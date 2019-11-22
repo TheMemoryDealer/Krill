@@ -1,0 +1,47 @@
+<!-- templates/view_trips.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<script src="{% static 'KrillApp/Javascript/view_trips.js' %}" type="text/javascript"></script>
+<script> var csrftoken = '{{ csrf_token }}'; </script>
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'KrillApp/view_trips.css' %}">
+
+<h3>View Trips</h3>
+<br />
+
+    <div id ="view_trips_buttons">
+        <a style="display:block" id="trip_button" class="btn btn-primary" href = "{% url 'upload_image_to_trip' %}">Upload New Image </a>
+        <a style="display:block" id="export_to_csv" onclick="export_trip_to_csv()"  class="btn btn-primary">Export Trip Data to CSV</a>
+        <a style="display:block" id="delete_trip" ajax-url = "{% url 'delete_trip' %}"  class="btn btn-primary">Delete Trip </a>
+    </div>
+<br />
+
+
+<ul ajax-url = "{% url 'get_trip_image_list' %}" id="trip_list" class="list-group">
+    {% for i in trip_list %}
+    <li  class="list-group-item list-group-item-action">{{ i }}</li>
+    {% endfor %}
+</ul>
+
+<h4 id="Trip_Name"></h4>
+
+<ul ajax-url= "{% url 'view_trip_image' %}"  media-url = "{{ MEDIA_URL }}" id="trip_image_list" class="list-group">
+        {% for i in trip_image_list %}
+        <li class="list-group-item list-group-item-action">{{ i }}</li>
+        {% endfor %}
+    
+    
+    
+    </ul>
+
+        
+
+
+
+
+{% endblock %}
