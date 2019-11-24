@@ -197,9 +197,20 @@ def Pull_From_CSV(request):
     krill_to_update = Krill.objects.filter(unique_krill_id__contains=str(image.file_name))
     for i in range(len(excel_data)):
         if i < len(excel_data):
+            print(excel_data[i])
             test = krill_to_update[i]
+            print('______________________')
+            print(krill_to_update[i])
+            print('______________________')
             test.length = excel_data[i][3]
+            print('______________________')
+            print(excel_data[i][3])
+            print('______________________')
             test.maturity = excel_data[i][4]
+            print(excel_data[i][4])
+            print('______________________')
+            test.lateral = excel_data[i][6]
+            test.dorsal = excel_data[i][7]
             test.save()
     conn.close()
     return JsonResponse({
@@ -216,19 +227,21 @@ def Export_To_CSV(request):
 def Extract_And_Send_CSV(trip):
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)
-    writer.writerow(['Length','Maturity','x','y','width','height','image','image_name'])
-    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length','maturity','x','y','width','height','image_file_id')
+    writer.writerow(['length','maturity','x','y','width','height','image_name', 'lateral', 'dorsal'])
+    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length','maturity','x','y','width','height','image_file_id', 'lateral', 'dorsal')
     krill = list(krill)
     for row in krill:
         if(row['maturity']!="Unclassified"):
-            x=int(row['x'])
-            y=int(row['y'])
-            w=int(row['width'])
-            h=int(row['height'])
-            image = Image.objects.get(file_name=row['image_file_id'])
-            image = cv2.imread("media/"+str(image.image))
-            image = image[y:y+h,x:x+w]
-            writer.writerow([row['length'],row['maturity'],row['x'],row['y'],row['width'],row['height'],image,row['image_file_id']])
+            # x=int(row['x'])
+            # y=int(row['y'])
+            # w=int(row['width'])
+            # h=int(row['height'])
+            # z=int(row['lateral'])
+            # q=int(row['dorsal'])
+            # image = Image.objects.get(file_name=row['image_file_id'])
+            # image = cv2.imread("media/"+str(image.image))
+            # image = image[y:y+h,x:x+w]
+            writer.writerow([row['length'],row['maturity'],row['x'],row['y'],row['width'],row['height'],row['image_file_id'],row['lateral'],row['dorsal']])
     
     SUBJECT = 'Subject string'
     FILENAME = str(trip)+'.csv'

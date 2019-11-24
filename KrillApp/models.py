@@ -34,6 +34,8 @@ class Krill(models.Model):
     image_annotation = models.TextField(default="")
     bounding_box_num = models.CharField(blank=False,null=True,max_length=30)
     unique_krill_id = models.CharField(primary_key=True, blank=False,null=False,unique=True,max_length=50)
+    lateral = models.CharField(blank=True,null=True, max_length=50)
+    dorsal = models.CharField(blank=True,null=True, max_length=50)
     x= models.CharField(max_length=50,default="")
     y= models.CharField(max_length=50,default="")
     height= models.CharField(max_length=50,default="")
