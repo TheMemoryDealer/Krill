@@ -211,6 +211,9 @@ def Pull_From_CSV(request):
             print('______________________')
             test.lateral = excel_data[i][6]
             test.dorsal = excel_data[i][7]
+            test.event = excel_data[i][0]
+            test.net = excel_data[i][2]
+            test.board = excel_data[i][5]
             test.save()
     conn.close()
     return JsonResponse({
