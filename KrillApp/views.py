@@ -195,6 +195,7 @@ def Pull_From_CSV(request):
         print(a)
 
     krill_to_update = Krill.objects.filter(unique_krill_id__contains=str(image.file_name))
+    print(len(excel_data))
     for i in range(len(excel_data)):
         if i < len(excel_data):
             print(excel_data[i])
@@ -238,9 +239,7 @@ def Extract_And_Send_CSV(trip):
             # x=int(row['x'])
             # y=int(row['y'])
             # w=int(row['width'])
-            # h=int(row['height'])
-            # z=int(row['lateral'])
-            # q=int(row['dorsal'])
+            # h=int(row['height'])3
             # image = Image.objects.get(file_name=row['image_file_id'])
             # image = cv2.imread("media/"+str(image.image))
             # image = image[y:y+h,x:x+w]
