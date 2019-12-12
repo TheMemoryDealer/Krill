@@ -228,6 +228,30 @@ def Export_To_CSV(request):
     thread.start()
     return HttpResponseRedirect('/view_trips')
 
+
+def Extract_Images(request):
+    trip = str(request.POST['trip'])
+    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length','maturity','x','y','width','height','image_file_id', 'lateral', 'dorsal', 'unique_krill_id')
+    krill = list(krill)
+    i = 0
+    for row in krill:
+        if(row['maturity']!="Unclassified"):
+            print("Start")
+            x=int(row['x'])
+            y=int(row['y'])
+            w=int(row['width'])
+            h=int(row['height'])
+            image = Image.objects.get(file_name=row['image_file_id'])
+            image = cv2.imread("media/"+str(image.image))
+            image = image[y:y+h,x:x+w]
+            imgName = row['unique_krill_id'] + '.jpg'
+            pathName = '/Users/mazgudelis/Desktop/ComputerVision/Krill images/' + imgName
+            cv2.imwrite(pathName, image)
+            i = i+1
+            print(str(i) + '/' + str(len(krill)))
+    return HttpResponseRedirect('/view_trips')
+    
+
 def Extract_And_Send_CSV(trip):
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)

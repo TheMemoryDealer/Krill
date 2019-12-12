@@ -24,6 +24,7 @@ class Trip(models.Model):
 class Image(models.Model):
     image = models.ImageField(unique=True, upload_to=user_directory_path)
     file_name = models.TextField(primary_key=True)
+    altr_view = models.TextField(default="")
     user_name = models.CharField(max_length=30, default="")
     trip_name = models.ForeignKey(
         Trip, to_field='trip_name', on_delete=models.CASCADE)
