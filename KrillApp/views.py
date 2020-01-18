@@ -1,45 +1,43 @@
-from django.http import HttpResponse ,HttpResponseRedirect ,JsonResponse
-from django.template.loader import render_to_string
-from django.shortcuts import render
-from django.core import serializers
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from KrillApp.forms import ImageForm ,TripForm
-from KrillApp.models import Image, Trip, Krill
-import scipy.io
-from django.views import View
-from django.templatetags.static import static
-from django.forms.models import model_to_dict
+import ast
+import csv
+import io
+import json
 import os
 import cv2
 import pickle
-import numpy as np
-import json
-import ast
-import sys
-from django.core.serializers.json import DjangoJSONEncoder
-import csvsqlite3
-import csv
 import smtplib
 import threading
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-from email.utils import COMMASPACE
 from email import encoders
-import io
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.utils import COMMASPACE
+
+import csvsqlite3
+import numpy as np
+import scipy.io
+from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.views import View
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from KrillApp.forms import ImageForm, TripForm
+from KrillApp.models import Image, Krill, Trip
 from .forms import StatForm
 
 
 def Pass_Form(request):
     if request.method == 'POST':
-        #print("helooo")
+        # print("helooo")
         form = StatForm(request.POST)
-        #print("111")
+        # print("111")
         if form.is_valid():
-            #print("WORKED")
-            #print(form)
+            # print("WORKED")
+            # print(form)
             board = form.cleaned_data['board']
             event = form.cleaned_data['event']
             net = form.cleaned_data['net']
@@ -55,37 +53,40 @@ def Pass_Form(request):
 
 def Upload_Image(request):
     if request.method == 'POST':
-        form = ImageForm(request.POST,request.FILES)
+        form = ImageForm(request.POST, request.FILES)
         if form.is_valid():
             instance = form.save(commit=False)
             instance.user_name = request.user.username
-            instance.user=request.user
+            instance.user = request.user
             instance.save()
             return HttpResponseRedirect('/images_successful')
     else:
         form = ImageForm()
-    return render(request, 'images_upload.html', {'form':form})
+    return render(request, 'images_upload.html', {'form': form})
+
 
 def Create_Trip(request):
     if request.method == 'POST':
-        form  = TripForm(request.POST)
+        form = TripForm(request.POST)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.user=request.user
+            instance.user = request.user
             instance.save()
             return HttpResponseRedirect('/view_trips')
     else:
         form = TripForm()
-    return render(request,'create_trip.html', {'form':form})
+    return render(request, 'create_trip.html', {'form': form})
 
-#gets and displays user images
+
+# gets and displays user images
 def Get_User_Images(request):
     sql = 'SELECT * FROM Krillapp_image WHERE user_id="' + str(request.user.id) + '";'
     urls = []
     images = Image.objects.raw(sql)
     for image in images:
-        urls.append(str(image.image_file).replace("user_"+str(request.user.id),""))
-    return render(request ,'images_view.html', {'images':images,'urls':urls})
+        urls.append(str(image.image_file).replace("user_" + str(request.user.id), ""))
+    return render(request, 'images_view.html', {'images': images, 'urls': urls})
+
 
 def Get_User_Trips(request):
     sql = 'SELECT * FROM Krillapp_trip;'
@@ -93,7 +94,8 @@ def Get_User_Trips(request):
     trips = Trip.objects.raw(sql)
     for trip in trips:
         trip_list.append(str(trip.trip_name))
-    return render(request ,'view_trips.html', {'trip_list':trip_list})
+    return render(request, 'view_trips.html', {'trip_list': trip_list})
+
 
 # FIX DELETE
 def Get_Trip_Image_List(request):
@@ -103,21 +105,21 @@ def Get_Trip_Image_List(request):
     for image in images:
         trip_image_list.append(str(image.image))
     return JsonResponse({
-        'trip_image_list':trip_image_list,
+        'trip_image_list': trip_image_list,
     })
+
 
 def Delete_Trip(request):
     Trip.objects.filter(trip_name=request.POST['trip_to_delete']).delete()
     return HttpResponseRedirect('/view_trips')
 
 
-
 def Upload_Image_To_Trip(request):
     trips = Trip.objects.all()
-    return render(request,'upload_image_to_trip.html',{'trips':trips})
+    return render(request, 'upload_image_to_trip.html', {'trips': trips})
 
 
-#todo fix lmao
+# todo fix lmao
 
 
 def Delete_User_Image(request):
@@ -125,10 +127,12 @@ def Delete_User_Image(request):
     return HttpResponse('/via')
 
 
-
 def View_Trip_Image(request):
-    html = render_to_string('view_trip_image.html',{'image_url':request.POST['image_url'],'raw_url':request.POST['stripped_url']},request=request)
+    html = render_to_string('view_trip_image.html',
+                            {'image_url': request.POST['image_url'], 'raw_url': request.POST['stripped_url']},
+                            request=request)
     return HttpResponse(html)
+
 
 class BasicUploadView(View):
     def get(self, request):
@@ -141,75 +145,80 @@ class BasicUploadView(View):
             instance = form.save(commit=False)
             instance.trip_name = Trip.objects.get(trip_name__exact=request.POST['trip_name'])
             instance.user_name = request.user.username
-            instance.user=request.user
-            instance.file_name= str(instance.image)
+            instance.user = request.user
+            instance.file_name = str(instance.image)
             instance.save()
             data = {'is_valid': True, 'url': instance.file_name}
         else:
             data = {'is_valid': False}
         return JsonResponse(data)
 
+
 def Load_VIA(request):
-    #Process_Krill_Photo()
+    # Process_Krill_Photo()
     sql = 'SELECT * FROM Krillapp_trip;'
     trip_list = []
     trips = Trip.objects.raw(sql)
     for trip in trips:
         trip_list.append(str(trip.trip_name))
-    return render(request ,'via.html', {'trips':trips})
+    return render(request, 'via.html', {'trips': trips})
 
 
-def Save_Image_Annotations(request):
-    # Saves the annotations to the image table too
-    Image.objects.filter(image= request.POST['image_file']).update(image_annotations=request.POST['image_annotations'])
-    image = Image.objects.get(image= str(request.POST['image_file']))
-    print(Krill.objects.filter(unique_krill_id__contains=str(image.file_name)).delete())
-    bounding_boxes = request.POST['image_annotations']
-    krill_attributes = request.POST['krill_attributes']
-    region_id = request.POST['region']
-    # Removing the square brackets and quotations from the string
-    bounding_boxes = bounding_boxes[2:]
-    bounding_boxes = bounding_boxes[:-2]
-    # Split the string into individual annotations
-    bounding_boxes = bounding_boxes.split('","')
-    krill_attributes = ast.literal_eval(krill_attributes)
-    region_id = ast.literal_eval(region_id)
-    tty = Image.objects.filter(image= request.POST['image_file']).update(
-            event = 2,
-            net = 2,
-            board = 2
+class ImageAnnotationsAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        # Saves the annotations to the image table too
+        file_name = request.data['image_file'].split('/')[-1].split('.')[0]
+        Image.objects.filter(file_name=file_name).update(image_annotations=request.data['image_annotations'])
+        image = Image.objects.get(file_name=file_name)
+        bounding_boxes = request.data['image_annotations']
+        krill_attributes = request.data['krill_attributes']
+        region_id = request.data['region']
+        # Removing the square brackets and quotations from the string
+        bounding_boxes = bounding_boxes[2:]
+        bounding_boxes = bounding_boxes[:-2]
+        # Split the string into individual annotations
+        bounding_boxes = bounding_boxes.split('","')
+        krill_attributes = ast.literal_eval(krill_attributes)
+        region_id = ast.literal_eval(region_id)
+        Image.objects.filter(file_name=file_name).update(
+            event=request.data['event'],
+            net=request.data["net"],
+            board=request.data["board"]
         )
-    for i in range(len(krill_attributes)):
-        unique_id = str(image.file_name) + "-" + str(region_id[i])
-        box_info = ast.literal_eval(bounding_boxes[i].replace("\\",""))
-        obj, created = Krill.objects.update_or_create(
-            unique_krill_id = unique_id,
-            defaults={'x':box_info['x'],'y':box_info['y'],'width':box_info['width'],'height':box_info['height'],'bounding_box_num':str(region_id[i]),'unique_krill_id' :unique_id,'image_file':image,'image_annotation':bounding_boxes[i],'length':krill_attributes[i]['Length'],'maturity':krill_attributes[i]['Maturity']}
-        )
-    return HttpResponse('/via')
-
-
-
-
+        for i in range(len(krill_attributes)):
+            unique_id = str(image.file_name) + "-" + str(region_id[i])
+            box_info = ast.literal_eval(bounding_boxes[i].replace("\\", ""))
+            obj, created = Krill.objects.update_or_create(
+                unique_krill_id=unique_id,
+                defaults={'x': box_info['x'],
+                          'y': box_info['y'], 'width': box_info['width'], 'height': box_info['height'],
+                          'bounding_box_num': str(region_id[i]), 'unique_krill_id': unique_id, 'image_file': image,
+                          'image_annotation': bounding_boxes[i], 'length': krill_attributes[i]['Length'],
+                          'maturity': krill_attributes[i]['Maturity']}
+            )
+        return Response("HERE IS YOUR RESPONSE 420 NIGGA")
 
 
 def Load_Image_Annotations(request):
     Images = Image.objects.filter(image=request.POST['image_file'])
     firstImage = Images.first()
     krill = Krill.objects.filter(unique_krill_id__contains=str(firstImage.file_name))
-    data = json.dumps(list(krill.values()),cls=DjangoJSONEncoder,ensure_ascii=False)
+    data = json.dumps(list(krill.values()), cls=DjangoJSONEncoder, ensure_ascii=False)
     return JsonResponse({
-        'annotations':firstImage.image_annotations,
-        'region_attributes':data,
+        'annotations': firstImage.image_annotations,
+        'region_attributes': data,
 
     })
 
+
 def Pull_From_CSV(request):
-    image = Image.objects.get(image= str(request.POST['image']))
+    image = Image.objects.get(image=str(request.POST['image']))
     print(image)
     conn = csvsqlite3.connect('JR255A.csv')
     cur = conn.cursor()
-    #print(cur.execute("select * from csv WHERE Lateral OR Dorsal='"+ str(image.file_name) +"'"))
+    # print(cur.execute("select * from csv WHERE Lateral OR Dorsal='"+ str(image.file_name) +"'"))
     # Do it like this, trust me
     xyz = "'" + str(image.file_name) + "'"
     abc = "select * from csv WHERE Lateral = " + xyz + " or Dorsal = " + xyz
@@ -244,48 +253,52 @@ def Pull_From_CSV(request):
             test.save()
     conn.close()
     return JsonResponse({
-            'num_pulled':len(excel_data),
+        'num_pulled': len(excel_data),
     })
+
 
 def Export_To_CSV(request):
     trip = str(request.POST['trip'])
-    thread=threading.Thread(target=Extract_And_Send_CSV,args=(trip,))
-    thread.daemon=True
+    thread = threading.Thread(target=Extract_And_Send_CSV, args=(trip,))
+    thread.daemon = True
     thread.start()
     return HttpResponseRedirect('/view_trips')
 
 
 def Extract_Images(request):
     trip = str(request.POST['trip'])
-    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length','maturity','x','y','width','height','image_file_id', 'lateral', 'dorsal', 'unique_krill_id')
+    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
+                                                                        'height', 'image_file_id', 'lateral', 'dorsal',
+                                                                        'unique_krill_id')
     krill = list(krill)
     i = 0
     for row in krill:
-        if(row['maturity']!="Unclassified"):
+        if (row['maturity'] != "Unclassified"):
             print("Start")
-            x=int(row['x'])
-            y=int(row['y'])
-            w=int(row['width'])
-            h=int(row['height'])
+            x = int(row['x'])
+            y = int(row['y'])
+            w = int(row['width'])
+            h = int(row['height'])
             image = Image.objects.get(file_name=row['image_file_id'])
-            image = cv2.imread("media/"+str(image.image))
-            image = image[y:y+h,x:x+w]
+            image = cv2.imread("media/" + str(image.image))
+            image = image[y:y + h, x:x + w]
             imgName = row['unique_krill_id'] + '.jpg'
             pathName = '/Users/mazgudelis/Desktop/ComputerVision/Krill images/' + imgName
             cv2.imwrite(pathName, image)
-            i = i+1
+            i = i + 1
             print(str(i) + '/' + str(len(krill)))
     return HttpResponseRedirect('/view_trips')
-    
+
 
 def Extract_And_Send_CSV(trip):
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)
-    writer.writerow(['length','maturity','x','y','width','height','image_name', 'lateral', 'dorsal'])
-    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length','maturity','x','y','width','height','image_file_id', 'lateral', 'dorsal')
+    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal'])
+    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
+                                                                        'height', 'image_file_id', 'lateral', 'dorsal')
     krill = list(krill)
     for row in krill:
-        if(row['maturity']!="Unclassified"):
+        if (row['maturity'] != "Unclassified"):
             # x=int(row['x'])
             # y=int(row['y'])
             # w=int(row['width'])
@@ -293,10 +306,12 @@ def Extract_And_Send_CSV(trip):
             # image = Image.objects.get(file_name=row['image_file_id'])
             # image = cv2.imread("media/"+str(image.image))
             # image = image[y:y+h,x:x+w]
-            writer.writerow([row['length'],row['maturity'],row['x'],row['y'],row['width'],row['height'],row['image_file_id'],row['lateral'],row['dorsal']])
-    
+            writer.writerow(
+                [row['length'], row['maturity'], row['x'], row['y'], row['width'], row['height'], row['image_file_id'],
+                 row['lateral'], row['dorsal']])
+
     SUBJECT = 'Subject string'
-    FILENAME = str(trip)+'.csv'
+    FILENAME = str(trip) + '.csv'
     MY_EMAIL = 'uea.krill.annotation@gmail.com'
     MY_PASSWORD = 'Krill123'
     TO_EMAIL = 'mazvydas66@gmail.com'
@@ -320,6 +335,7 @@ def Extract_And_Send_CSV(trip):
     smtpObj.sendmail(MY_EMAIL, TO_EMAIL, msg.as_string())
     smtpObj.quit()
 
+
 def Sort_Boxes(request):
     list = []
     MAGIC_NUMBER = 550
@@ -334,7 +350,7 @@ def Sort_Boxes(request):
     for i in bounding_boxes:
         list.append(ast.literal_eval(i.replace("\\", "")))
 
-    sorted_ctrs = sorted(list, key=lambda box: box['x']*MAGIC_NUMBER + box['y'] * image.shape[1])
+    sorted_ctrs = sorted(list, key=lambda box: box['x'] * MAGIC_NUMBER + box['y'] * image.shape[1])
 
     return JsonResponse({
         'annotations': sorted_ctrs,
@@ -342,24 +358,24 @@ def Sort_Boxes(request):
 
 
 def Detect_Krill(request):
-
     FAST = True
-    #load in the foreground and ratio histogram classes
+    # load in the foreground and ratio histogram classes
     image = str(os.path.join(settings.MEDIA_ROOT, str(request.POST['image_file'])))
-    foregroundHist = scipy.io.loadmat(str(os.path.join(settings.STATIC_ROOT, 'MatlabFiles//normalisedForeground32.mat')))
+    foregroundHist = scipy.io.loadmat(
+        str(os.path.join(settings.STATIC_ROOT, 'MatlabFiles//normalisedForeground32.mat')))
     ratioHist = scipy.io.loadmat(str(os.path.join(settings.STATIC_ROOT, 'MatlabFiles//ratioHistogram32.mat')))
     histograms32 = HistogramConfig(foregroundHist, ratioHist, 32)
     print("Normalising Image\n")
-    #newKrillImage = img_normalise(image)
+    # newKrillImage = img_normalise(image)
     newKrillImage = img_normalise(image)
     print("Applying Logical Mask\n")
     logical_mask = segmentKrill(newKrillImage, histograms32, FAST)
     print("Performing Opening and Closing\n")
     noiseReducedmask = performOpeningClosing(logical_mask)
     print("Superimposing Bounding Boxes\n")
-    regions = createBoundingBoxes(noiseReducedmask,image )
+    regions = createBoundingBoxes(noiseReducedmask, image)
     return JsonResponse({
-            'annotations':regions,
+        'annotations': regions,
     })
 
 
@@ -373,8 +389,7 @@ class HistogramConfig:
     # so here we have the default parameters for the testing class
     # otherwise we siply take the passed parameters
     # this is defined as the instance variable
-    def __init__(self, foregroundHist, ratioHist, quantLevel = 32):
-
+    def __init__(self, foregroundHist, ratioHist, quantLevel=32):
         self.foregroundHist = foregroundHist
         self.ratioHist = ratioHist
         self.quantLevel = quantLevel
@@ -390,7 +405,7 @@ def createBoundingBoxes(img, original_image_path):
     # Contours contains the rough co-ordinates of our contours.
     contours = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    #manually tuned offset, weighting the x-axis order.
+    # manually tuned offset, weighting the x-axis order.
     MAGIC_NUMBER = 550
 
     original_img = cv2.imread(original_image_path, cv2.IMREAD_COLOR)
@@ -408,21 +423,19 @@ def createBoundingBoxes(img, original_image_path):
 
     mean_area = max_area
 
-
     # way of going through each contour
 
     regions = []
     bbs = []
-    #sort the bounding boxes to match sophie's conventions
-    sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0]*MAGIC_NUMBER + cv2.boundingRect(ctr)[1] * original_img.shape[1])
+    # sort the bounding boxes to match sophie's conventions
+    sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0] * MAGIC_NUMBER + cv2.boundingRect(ctr)[1] *
+                                                   original_img.shape[1])
 
-    #sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0]  * original_img.shape[1])
-
-
+    # sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0]  * original_img.shape[1])
 
     for i in range(0, num_contours):
-        if not(smallCountourCheck(sorted_ctrs[i], mean_area)):
-            #xCoord,yCoord,w,h = cv2.boundingRect(contours[i])
+        if not (smallCountourCheck(sorted_ctrs[i], mean_area)):
+            # xCoord,yCoord,w,h = cv2.boundingRect(contours[i])
             box = cv2.boundingRect(sorted_ctrs[i])
             box = {
                 "name": "rect",
@@ -433,25 +446,23 @@ def createBoundingBoxes(img, original_image_path):
             }
             regions.append(box)
 
-    #print(regions)
-            #rectangle = cv2.rectangle(original_img, (x,y), (x+w, y+h), (0, 0, 255), 5)
-    #test = sorted(bbs,key=lambda b:b[1][i],reverse=False)
-
-
-
+    # print(regions)
+    # rectangle = cv2.rectangle(original_img, (x,y), (x+w, y+h), (0, 0, 255), 5)
+    # test = sorted(bbs,key=lambda b:b[1][i],reverse=False)
 
     return regions
+
+
 #
 # Method to remove very small contour
 #
 def smallCountourCheck(c, mean):
-    return cv2.contourArea(c) < (0.5 * mean/10)
+    return cv2.contourArea(c) < (0.5 * mean / 10)
 
 
 # function to perform opening and closing
 # might need to use a different structuring element ?
 def performOpeningClosing(logicalImg):
-
     firstKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
 
     secondKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (26, 26))
@@ -460,17 +471,16 @@ def performOpeningClosing(logicalImg):
 
     closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, secondKernel)
 
-
-    #cv2.namedWindow("output", cv2.WINDOW_NORMAL)
-    #newImg = cv2.resize(closing, (6048, 4032))
-    #cv2.imshow("output", newImg)
-    #cv2.waitKey(0)
+    # cv2.namedWindow("output", cv2.WINDOW_NORMAL)
+    # newImg = cv2.resize(closing, (6048, 4032))
+    # cv2.imshow("output", newImg)
+    # cv2.waitKey(0)
 
     return closing
 
-# this function is designed to take a normalised image and the respective histogram object
-def segmentKrill(normalisedImg,  histogram_object, FAST):
 
+# this function is designed to take a normalised image and the respective histogram object
+def segmentKrill(normalisedImg, histogram_object, FAST):
     qLevels = histogram_object.quantLevel
 
     # pre-calculated threshold values
@@ -488,7 +498,6 @@ def segmentKrill(normalisedImg,  histogram_object, FAST):
     normalisedImg[:, :, 1] = (normalisedImg[:, :, 1] / 255 * qLevels)
     normalisedImg[:, :, 2] = (normalisedImg[:, :, 2] / 255 * qLevels)
 
-
     if not FAST:
 
         dimensions_tuple = normalisedImg.shape
@@ -501,8 +510,9 @@ def segmentKrill(normalisedImg,  histogram_object, FAST):
                 rValue = normalisedImg.item(i, x, 2)
 
                 # need to decrement pixel index due to python conventions of starting from 0
-                ratioProb = histogram_object.ratioHist['ratioHist32Final'][rValue-1][gValue-1][bValue-1]
-                foregroundProb = histogram_object.foregroundHist['normalisedHistogramB'][rValue-1][gValue-1][bValue-1]
+                ratioProb = histogram_object.ratioHist['ratioHist32Final'][rValue - 1][gValue - 1][bValue - 1]
+                foregroundProb = histogram_object.foregroundHist['normalisedHistogramB'][rValue - 1][gValue - 1][
+                    bValue - 1]
 
                 if ratioProb > GENERIC_THRESHOLD and foregroundProb > GENERIC_THREHOLD_FOREGROUND:
                     logicalImg.itemset((i, x), 255)
@@ -557,20 +567,18 @@ def segmentKrill(normalisedImg,  histogram_object, FAST):
     return logicalImg
 
 
-
 # take an img path and return the read in img
 # read in colour image
 def read_img(imgPath):
-
     img = cv2.imread(imgPath, cv2.IMREAD_COLOR)
     cv2.imshow('image', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return img
 
+
 # method to noramlise an image
 def img_normalise(imgPath):
-
     # is read in as B G R
     img = cv2.imread(imgPath, cv2.IMREAD_COLOR)
 
@@ -594,16 +602,16 @@ def img_normalise(imgPath):
     img[:, :, 1] = np.clip((green / green_avg) * ref_colours[0, 1], 0, 255)
     img[:, :, 2] = np.clip((red / red_avg) * ref_colours[0, 0], 0, 255)
 
-   # cv2.namedWindow("output", cv2.WINDOW_NORMAL)
-    #newImg = cv2.resize(img, (6048, 4032))
-    #cv2.imshow("output", newImg)
-    #cv2.waitKey(0)
+    # cv2.namedWindow("output", cv2.WINDOW_NORMAL)
+    # newImg = cv2.resize(img, (6048, 4032))
+    # cv2.imshow("output", newImg)
+    # cv2.waitKey(0)
 
     return img
 
+
 # need to manually set yhe value to be 255
 def calculatePixelValue(currentPixelValue, avg, ref_colour):
-
     value = round((currentPixelValue / avg) * ref_colour)
     if value > 255:
         return 255
@@ -613,13 +621,12 @@ def calculatePixelValue(currentPixelValue, avg, ref_colour):
 
 # method to save an item with a filename
 def pickle_item(fileName, item2Pickle):
-
     # write to the objectDump.text file
-    with open (fileName, 'wb') as f:
+    with open(fileName, 'wb') as f:
         pickle.dump(item2Pickle, f, pickle.DEFAULT_PROTOCOL)
+
 
 # method to load an item based on the filepath
 def load_item(filePath):
-
     with open(filePath, 'rb') as f:
         return pickle.load(f)

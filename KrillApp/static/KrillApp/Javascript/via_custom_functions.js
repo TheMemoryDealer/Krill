@@ -86,6 +86,9 @@ function save_annotations_to_DB(){
                 image_file: image,
                 image_annotations: JSON.stringify(csvArray),
                 krill_attributes: csvlineAttributes,
+                board: $("#board").val(),
+                event: $("#event").val(),
+                net: $("#netbox").val(),
                 region: JSON.stringify(region_ids),
                 'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")
             },

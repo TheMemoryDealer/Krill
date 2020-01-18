@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'KrillApp',
     'crispy_forms',
     'django_cleanup',
+    "rest_framework"
     
 ]
 

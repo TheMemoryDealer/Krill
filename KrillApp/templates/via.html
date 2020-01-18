@@ -252,8 +252,8 @@
           <div id='containerC'>
             <form action="post_cruise_details" method="POST">
               {% csrf_token %}
-              Board <input type="text" name="board"><br>
-              Event <input type="text" name="event"><br>
+                Board <input type="text" name="board" id="board"><br>
+              Event <input type="text" name="event" id="event"><br>
               Net <input type="text" id="netbox" name="net"><br>
               <!-- <input type="submit" class="btn btn-primary" value="Submit">  -->
             </form>
@@ -441,7 +441,7 @@
 
     <!-- Main display area: contains image canvas, ... -->
     <div id="display_area">
-      
+
       <div class="center" style="display:none" id="annotation_toggle">
       <h2 id="current_image"></h2>
       Toggle Annotations: <input ajax-url="{% url 'load_image_annotations' %}" id="toggle_annotations" data-width="100" type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="danger" />
@@ -698,7 +698,7 @@
             document.getElementById("current_image").innerHTML = $(this).text();
             $(this).css("background-color", "gray");
             document.getElementById("annotation_toggle").style.display="block";
-            $('#toggle_annotations').bootstrapToggle('off')  
+            $('#toggle_annotations').bootstrapToggle('off')
 
                 },
                 cancel: function () {
@@ -713,12 +713,12 @@
             document.getElementById("current_image").innerHTML = $(this).text();
             $(this).css("background-color", "gray");
             document.getElementById("annotation_toggle").style.display="block";
-            $('#toggle_annotations').bootstrapToggle('off')  
+            $('#toggle_annotations').bootstrapToggle('off')
         }
 
       });
 
-  
+
 
     function clearRows() {
       $('#gallery tbody td').each(function () {
@@ -734,7 +734,7 @@
           if(_via_canvas_regions.length ==0){
             toggleClicked();
           }
-          
+
         }
         else{
         _via_canvas_regions  = [];

@@ -1,0 +1,10 @@
+
+Krill/__pycache__/
+
+.idea/
+
+KrillApp/__pycache__/
+
+KrillApp/migrations/__pycache__/
+
+*.sqlite3
