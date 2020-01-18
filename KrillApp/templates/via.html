@@ -246,6 +246,21 @@
         </ul>
       </div>
 
+      <div id="rightsidebar">
+        <button class="leftsidebar_accordion active">Cruise details</button>
+        <div class="leftsidebar_accordion_panel show">
+          <div id='containerC'>
+            <form action="post_cruise_details" method="POST">
+              {% csrf_token %}
+              Board <input type="text" name="board"><br>
+              Event <input type="text" name="event"><br>
+              Net <input type="text" id="netbox" name="net"><br>
+              <input type="submit" class="btn btn-primary" value="Submit">
+            </form>
+            </div>
+        </div>
+        </div>
+
       <!-- Project -->
       <button class="leftsidebar_accordion active" id="project_panel_title">Trip</button>
       <div class="leftsidebar_accordion_panel show" id="img_fn_list_panel">

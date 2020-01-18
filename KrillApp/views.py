@@ -29,6 +29,34 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 from email import encoders
 import io
+from .forms import StatForm
+
+
+def Pass_Form(request):
+    #print(Image.objects.filter(image=request.POST.get('image', False)))
+    Image.objects.filter(image=request.POST.get('file_name', False))
+    image = Image.objects.get(image= str(request.POST.get('file_name', False)))
+    print(image)
+
+
+    if request.method == 'POST':
+        #print("helooo")
+        form = StatForm(request.POST)
+        #print("111")
+        if form.is_valid():
+            #print("WORKED")
+            #print(form)
+            board = form.cleaned_data['board']
+            event = form.cleaned_data['event']
+            net = form.cleaned_data['net']
+            print(board)
+            print(event)
+            print(net)
+            return HttpResponseRedirect('/via/')
+    else:
+        print("NO WORK")
+        form = StatForm()
+    return HttpResponseRedirect('/via')
 
 
 def Upload_Image(request):
@@ -85,7 +113,6 @@ def Get_Trip_Image_List(request):
     })
 
 def Delete_Trip(request):
-
     Trip.objects.filter(trip_name=request.POST['trip_to_delete']).delete()
     return HttpResponseRedirect('/view_trips')
 

@@ -49,6 +49,7 @@ urlpatterns = [
     path("export_to_csv/", views.Export_To_CSV, name='export_to_csv'),
     path("sort_boxes/", views.Sort_Boxes, name='sort_boxes'),
     path("extract_images/", views.Extract_Images, name='extract_images'),
+    path("via/post_cruise_details", views.Pass_Form, name="post_cruise_form")
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

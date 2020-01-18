@@ -77,6 +77,9 @@ body { min-width:200px; padding:0; margin:0; font-family:sans-serif; }
       button.leftsidebar_accordion.active:after { content: '\2796'; }
       .leftsidebar_accordion_panel { display:none; padding:0 0.5em; font-size:small; border-right:2px solid #f2f2f2; border-bottom:2px solid #f2f2f2; }
       .leftsidebar_accordion_panel.show { display:block; }
+      #netbox {
+        margin-left : 12px;
+      }
 
       /* Keyboard shortcut panel */
       .leftsidebar_accordion_panel table { border-collapse:collapse; }

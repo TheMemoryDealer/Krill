@@ -25,6 +25,10 @@ function trip_change() {
 
 };
 
+function post_cruise_details() {
+    print("this is running")
+}
+
 function save_annotations_to_DB(){
     var csvline = [];
     var csvArray= [];
