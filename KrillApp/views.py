@@ -33,12 +33,6 @@ from .forms import StatForm
 
 
 def Pass_Form(request):
-    #print(Image.objects.filter(image=request.POST.get('image', False)))
-    Image.objects.filter(image=request.POST.get('file_name', False))
-    image = Image.objects.get(image= str(request.POST.get('file_name', False)))
-    print(image)
-
-
     if request.method == 'POST':
         #print("helooo")
         form = StatForm(request.POST)
@@ -180,6 +174,11 @@ def Save_Image_Annotations(request):
     bounding_boxes = bounding_boxes.split('","')
     krill_attributes = ast.literal_eval(krill_attributes)
     region_id = ast.literal_eval(region_id)
+    tty = Image.objects.filter(image= request.POST['image_file']).update(
+            event = 2,
+            net = 2,
+            board = 2
+        )
     for i in range(len(krill_attributes)):
         unique_id = str(image.file_name) + "-" + str(region_id[i])
         box_info = ast.literal_eval(bounding_boxes[i].replace("\\",""))

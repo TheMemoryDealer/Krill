@@ -29,21 +29,21 @@ class Image(models.Model):
     trip_name = models.ForeignKey(
         Trip, to_field='trip_name', on_delete=models.CASCADE)
     image_annotations = models.TextField(default="")
+    event = models.CharField(max_length=30, default="")
+    net = models.CharField(max_length=30, default="")
+    board = models.CharField(max_length=30, default="")
 
 
 class Krill(models.Model):
-    image_file = models.ForeignKey(
-        Image, on_delete=models.CASCADE, blank=True, null=True)
+    image_file = models.ForeignKey(Image, on_delete=models.CASCADE, blank=True, null=True)
     length = models.CharField(blank=True, null=True, max_length=30, default="")
-    maturity = models.CharField(
-        blank=True, null=True, max_length=30, default="")
+    maturity = models.CharField(blank=True, null=True, max_length=30, default="")
     event = models.CharField(max_length=50, default="")
     net = models.CharField(max_length=50, default="")
     board = models.CharField(max_length=50, default="")
     image_annotation = models.TextField(default="")
     bounding_box_num = models.CharField(blank=False, null=True, max_length=30)
-    unique_krill_id = models.CharField(
-        primary_key=True, blank=False, null=False, unique=True, max_length=50)
+    unique_krill_id = models.CharField(primary_key=True, blank=False, null=False, unique=True, max_length=50)
     lateral = models.CharField(blank=True, null=True, max_length=50)
     dorsal = models.CharField(blank=True, null=True, max_length=50)
     x = models.CharField(max_length=50, default="")

@@ -285,6 +285,36 @@ function pull_from_csv(){
     }
 }
 
+
+function pass_form(){
+    var image_to_pull= document.getElementById("current_image").innerHTML;
+    image_to_pull = image_to_pull.replace($("#delete_photo").attr("media-url"),"");
+    console.log(image_to_pull);
+    image_to_pull = image_to_pull.trim();
+    if (image_to_pull != null){
+    $.ajax({type: "POST",
+    url: "/post_cruise_form/",
+    data: {image: image_to_pull,
+            'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")},
+    success:function(result){
+        $.alert({
+            title: 'Summary',
+            content: result['num_pulled']+ " rows pulled from csv file.",
+            buttons:{
+                OK: function(){
+
+        	    $('#toggle_annotations').bootstrapToggle('toggle');
+        		$('#toggle_annotations').bootstrapToggle('toggle');
+                }
+            }
+    
+        });
+    }})
+        
+    }
+}
+
+
 function sort_boxes(){
       var csvline = [];
     var csvArray= [];
