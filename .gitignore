@@ -8,3 +8,5 @@ KrillApp/__pycache__/
 KrillApp/migrations/__pycache__/
 
 *.sqlite3
+
+media/

@@ -169,7 +169,8 @@ class ImageAnnotationsAPIView(APIView):
 
     def post(self, request):
         # Saves the annotations to the image table too
-        file_name = request.data['image_file'].split('/')[-1].split('.')[0]
+        file_name = request.data['image_file'].split('/')[-1]
+        print(file_name)
         Image.objects.filter(file_name=file_name).update(image_annotations=request.data['image_annotations'])
         image = Image.objects.get(file_name=file_name)
         bounding_boxes = request.data['image_annotations']
