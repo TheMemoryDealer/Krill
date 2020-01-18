@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from KrillApp.models import Image, Krill
+
+admin.site.register(Image)
+admin.site.register(Krill)
