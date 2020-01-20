@@ -20,6 +20,8 @@ from django.views.generic.base import TemplateView  # new
 
 from KrillApp import views
 from KrillApp.views import ImageAnnotationsAPIView
+from KrillApp.views import AltViewAPIView
+
 
 urlpatterns = [
                   path("", TemplateView.as_view(template_name='home.html'), name='home'),
@@ -48,7 +50,9 @@ urlpatterns = [
                   path("export_to_csv/", views.Export_To_CSV, name='export_to_csv'),
                   path("sort_boxes/", views.Sort_Boxes, name='sort_boxes'),
                   path("extract_images/", views.Extract_Images, name='extract_images'),
-                  path("via/post_cruise_details", views.Pass_Form, name="post_cruise_form")
+                  path("via/post_cruise_details", views.Pass_Form, name="post_cruise_form"),
+                  path("via/microdata", views.Get_Image_Cruise_Details, name="microdata"),
+                  path("via/alt", AltViewAPIView.as_view(), name="alt")
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

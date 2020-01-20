@@ -11,13 +11,21 @@ function trip_change() {
             'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")
         },
         success: function (result) {
+            $("#alt-view").empty()
             var image_list = result['trip_image_list'];
             for(var i = 0; i < image_list.length; i++){
                 
                 $("#gallery tbody").prepend(
                     "<tr><td>"+ image_list[i]+" </td></tr>"
                   )
+                  $("#alt-view").prepend(
+                    "<option value="+ image_list[i]+">"+image_list[i]+"</option>"
+                  )
+                
             }
+            $("#alt-view").append(
+                "<option value=></option>"
+              )
            
         }
     })
@@ -25,9 +33,50 @@ function trip_change() {
 
 };
 
-function post_cruise_details() {
-    print("this is running")
+
+function asd() {
+    var image = document.getElementById("current_image").innerHTML;
+    image = image.replace($("#delete_photo").attr("media-url"),"");
+    // Removes whitespace
+    image = image.trim();
+
+    console.log(image)
+
+
+    $.ajax({
+        type: "POST",
+        url: "/via/alt",
+        data: {
+            image_file: image,
+            alt_img: $("#alt-view").val(),
+            'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")
+        },
+        success: function (result) {
+                console.log("WOOORKS!")
+
+        }
+    })
 }
+
+function user_click_image(path){
+    _via_img_metadata={};
+    var img_id    = project_file_add_url(path);
+    $.ajax({type: "GET",
+        url: '/via/microdata',
+        data: {image: img_id,
+                'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")},
+    success:function(result){
+        console.log(result.fill_data)
+        document.getElementById("board").value = result.board
+        document.getElementById("event").value = result.net
+        document.getElementById("netbox").value = result.event
+        document.getElementById("alt-view").value = result.altr_view
+    }})
+    var img_index = _via_image_id_list.indexOf(img_id);
+    console.log("MDFUCKAH");
+    _via_show_img(img_index);
+}
+
 
 function save_annotations_to_DB(){
     var csvline = [];
@@ -94,8 +143,8 @@ function save_annotations_to_DB(){
             },
             success: function (result) {
                     $.alert({
-                        title: 'Save Annotations',
-                        content: "Annotations Saved!",
+                        title: 'Save Data',
+                        content: "Data Saved!",
                 
                     });
 
@@ -220,13 +269,6 @@ function toggleClicked(){
 
 }
 
-function user_click_image(path){
-    _via_img_metadata={};
-    var img_id    = project_file_add_url(path);
-    var img_index = _via_image_id_list.indexOf(img_id);
-    _via_show_img(img_index);
-}
-
 function delete_photo(){
     var image_to_delete= document.getElementById("current_image").innerHTML;
 
@@ -289,33 +331,6 @@ function pull_from_csv(){
 }
 
 
-function pass_form(){
-    var image_to_pull= document.getElementById("current_image").innerHTML;
-    image_to_pull = image_to_pull.replace($("#delete_photo").attr("media-url"),"");
-    console.log(image_to_pull);
-    image_to_pull = image_to_pull.trim();
-    if (image_to_pull != null){
-    $.ajax({type: "POST",
-    url: "/post_cruise_form/",
-    data: {image: image_to_pull,
-            'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")},
-    success:function(result){
-        $.alert({
-            title: 'Summary',
-            content: result['num_pulled']+ " rows pulled from csv file.",
-            buttons:{
-                OK: function(){
-
-        	    $('#toggle_annotations').bootstrapToggle('toggle');
-        		$('#toggle_annotations').bootstrapToggle('toggle');
-                }
-            }
-    
-        });
-    }})
-        
-    }
-}
 
 
 function sort_boxes(){

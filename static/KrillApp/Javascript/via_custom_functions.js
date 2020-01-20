@@ -142,6 +142,8 @@ function toggleClicked() {
 function user_click_image(path) {
     _via_img_metadata = {};
     var img_id = project_file_add_url(path);
+    console.log("YEEEHAW")
+    console.log(img_id)
     var img_index = _via_image_id_list.indexOf(img_id);
     _via_show_img(img_index);
 }

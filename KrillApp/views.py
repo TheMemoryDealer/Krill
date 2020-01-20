@@ -87,6 +87,17 @@ def Get_User_Images(request):
         urls.append(str(image.image_file).replace("user_" + str(request.user.id), ""))
     return render(request, 'images_view.html', {'images': images, 'urls': urls})
 
+def Get_Image_Cruise_Details(request):
+    sql = 'SELECT * FROM Krillapp_image WHERE file_name="' + str(request.GET["image"].split(" ")[0].split("/")[3]) + '";'
+    ds = []
+    details = Image.objects.raw(sql)
+    for d in details:
+        return JsonResponse({
+            'board': str(d.board),
+            'net': str(d.net),
+            'event': str(d.event),
+            'altr_view': str(d.altr_view)
+        })
 
 def Get_User_Trips(request):
     sql = 'SELECT * FROM Krillapp_trip;'
@@ -104,6 +115,7 @@ def Get_Trip_Image_List(request):
     images = Image.objects.raw(sql)
     for image in images:
         trip_image_list.append(str(image.image))
+    #print(trip_image_list)
     return JsonResponse({
         'trip_image_list': trip_image_list,
     })
@@ -163,6 +175,20 @@ def Load_VIA(request):
         trip_list.append(str(trip.trip_name))
     return render(request, 'via.html', {'trips': trips})
 
+class AltViewAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        # Saves the annotations to the image table too
+        file_name = request.data['image_file'].split('/')[-1]
+        print(file_name)
+        Image.objects.filter(file_name=file_name).update(altr_view=request.data['alt_img'])
+        image = Image.objects.get(file_name=file_name)
+        Image.objects.filter(file_name=file_name).update(
+            altr_view=request.data['alt_img'],
+        )
+        return Response("Done")
+
 
 class ImageAnnotationsAPIView(APIView):
     permission_classes = (AllowAny,)
@@ -199,7 +225,7 @@ class ImageAnnotationsAPIView(APIView):
                           'image_annotation': bounding_boxes[i], 'length': krill_attributes[i]['Length'],
                           'maturity': krill_attributes[i]['Maturity']}
             )
-        return Response("HERE IS YOUR RESPONSE 420 NIGGA")
+        return Response("Done")
 
 
 def Load_Image_Annotations(request):
@@ -215,6 +241,7 @@ def Load_Image_Annotations(request):
 
 
 def Pull_From_CSV(request):
+    Get_Image_Cruise_Details(request)
     image = Image.objects.get(image=str(request.POST['image']))
     print(image)
     conn = csvsqlite3.connect('JR255A.csv')

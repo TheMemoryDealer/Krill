@@ -305,7 +305,7 @@
               onclick="delete_photo()" title="Remove selected file (i.e. file currently being shown) from trip">Delete
               Selected Photo</span>
             <span style="display:block;text-align: center" id="save_annotations" ajax-url= "{% url 'save_image_annotations' %}" media-url="{{ MEDIA_URL}}"
-              class="btn btn-primary" onclick="save_annotations_to_DB()" title="">Save Annotations</span>
+              class="btn btn-primary" onclick="save_annotations_to_DB()" title="">Save Data</span>
               <span style="display:block;text-align: center" id="detect_krill" ajax-url-2= "{% url 'detect_krill' %}" media-url="{{ MEDIA_URL}}" ajax-url="{% url 'detect_krill' %}"
               class="btn btn-primary" onclick="detect_krill()" title="">Detect Krill</span>
               <span style="display:block;text-align: center" id="pull_csv_data" class="btn btn-primary" onclick="pull_from_csv()" title="">Pull Photo CSV Data</span>
@@ -444,8 +444,15 @@
 
       <div class="center" style="display:none" id="annotation_toggle">
       <h2 id="current_image"></h2>
+      Alternate view:
+      <select ajax-url="{% url 'get_trip_image_list' %}" id="alt-view" onchange="asd()"
+                style="width: 30%;" data-token="{{ csrf_token }}">
+              </select>
+            <br>
       Toggle Annotations: <input ajax-url="{% url 'load_image_annotations' %}" id="toggle_annotations" data-width="100" type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="danger" />
+      <!--<span id="save_annotations" ajax-url= "{% url 'save_image_annotations' %}" media-url="{{ MEDIA_URL}}" class="btn btn-primary" onclick="save_annotations_to_DB()" title="">Save Data</span>-->
     </div>
+    
   </br >
 
       <div id="image_panel" class="display_area_content display_none">

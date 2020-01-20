@@ -3154,6 +3154,7 @@ function update_img_fn_list() {
       img_fn_list.innerHTML = _via_img_fn_list_html.join('');
       img_fn_list_scroll_to_current_file();
     } else {
+      console.log("HERE");
       // filter according to preset filters
       img_fn_list_onpresetfilter_select();
     }
