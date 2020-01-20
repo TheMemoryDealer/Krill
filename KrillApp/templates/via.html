@@ -255,6 +255,11 @@
                 Board <input type="text" name="board" id="board"><br>
               Event <input type="text" name="event" id="event"><br>
               Net <input type="text" id="netbox" name="net"><br>
+              Position <select id="pbox" style="margin-bottom: 15px; margin-top: 15px;">
+                <option value="Lateral">Lateral</option>
+                <option value="Dorsal">Dorsal</option>
+                <option selected value=""></option>
+              </select>
               <!-- <input type="submit" class="btn btn-primary" value="Submit">  -->
             </form>
             </div>
@@ -444,10 +449,11 @@
 
       <div class="center" style="display:none" id="annotation_toggle">
       <h2 id="current_image"></h2>
-      Alternate view:
-      <select ajax-url="{% url 'get_trip_image_list' %}" id="alt-view" onchange="asd()"
+      <div style="display:inline" id="picname">Alternate view:</div>
+      <select ajax-url="{% url 'get_trip_image_list' %}" id="alt-view"
                 style="width: 30%;" data-token="{{ csrf_token }}">
               </select>
+              <button type="button" onclick="asd()">Save</button>
             <br>
       Toggle Annotations: <input ajax-url="{% url 'load_image_annotations' %}" id="toggle_annotations" data-width="100" type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="danger" />
       <!--<span id="save_annotations" ajax-url= "{% url 'save_image_annotations' %}" media-url="{{ MEDIA_URL}}" class="btn btn-primary" onclick="save_annotations_to_DB()" title="">Save Data</span>-->

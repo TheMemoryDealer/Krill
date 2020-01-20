@@ -40,9 +40,6 @@ function asd() {
     // Removes whitespace
     image = image.trim();
 
-    console.log(image)
-
-
     $.ajax({
         type: "POST",
         url: "/via/alt",
@@ -66,14 +63,30 @@ function user_click_image(path){
         data: {image: img_id,
                 'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")},
     success:function(result){
-        console.log(result.fill_data)
         document.getElementById("board").value = result.board
         document.getElementById("event").value = result.net
         document.getElementById("netbox").value = result.event
         document.getElementById("alt-view").value = result.altr_view
+        let xyz = result.position;
+        if (xyz == "Lateral"){
+            console.log("CUUUNT")
+            let a = "Dorsal"
+            document.getElementById("pbox").value = result.position
+            $("#picname").text(a + " view:");
+        }
+        else{
+            console.log("LOOOL")
+            let a = "Lateral"
+            document.getElementById("pbox").value = result.position
+            $("#picname").text(a + " view:");
+        }
+        console.log(result.board);
+        console.log(result.net);
+        console.log(result.event);
+        console.log(result.position);
+        console.log(result.position + " view:");
     }})
     var img_index = _via_image_id_list.indexOf(img_id);
-    console.log("MDFUCKAH");
     _via_show_img(img_index);
 }
 
@@ -138,6 +151,7 @@ function save_annotations_to_DB(){
                 board: $("#board").val(),
                 event: $("#event").val(),
                 net: $("#netbox").val(),
+                position: $("#pbox").val(),
                 region: JSON.stringify(region_ids),
                 'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")
             },

@@ -96,7 +96,8 @@ def Get_Image_Cruise_Details(request):
             'board': str(d.board),
             'net': str(d.net),
             'event': str(d.event),
-            'altr_view': str(d.altr_view)
+            'altr_view': str(d.altr_view),
+            'position': str(d.position)
         })
 
 def Get_User_Trips(request):
@@ -182,11 +183,9 @@ class AltViewAPIView(APIView):
         # Saves the annotations to the image table too
         file_name = request.data['image_file'].split('/')[-1]
         print(file_name)
+        print(request.data['alt_img'])
         Image.objects.filter(file_name=file_name).update(altr_view=request.data['alt_img'])
-        image = Image.objects.get(file_name=file_name)
-        Image.objects.filter(file_name=file_name).update(
-            altr_view=request.data['alt_img'],
-        )
+        Image.objects.filter(file_name=str(request.data['alt_img']).split("/")[-1]).update(altr_view=file_name)
         return Response("Done")
 
 
@@ -212,7 +211,8 @@ class ImageAnnotationsAPIView(APIView):
         Image.objects.filter(file_name=file_name).update(
             event=request.data['event'],
             net=request.data["net"],
-            board=request.data["board"]
+            board=request.data["board"],
+            position=request.data["position"]
         )
         for i in range(len(krill_attributes)):
             unique_id = str(image.file_name) + "-" + str(region_id[i])
@@ -241,7 +241,7 @@ def Load_Image_Annotations(request):
 
 
 def Pull_From_CSV(request):
-    Get_Image_Cruise_Details(request)
+    #Get_Image_Cruise_Details(request)
     image = Image.objects.get(image=str(request.POST['image']))
     print(image)
     conn = csvsqlite3.connect('JR255A.csv')
