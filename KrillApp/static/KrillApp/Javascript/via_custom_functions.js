@@ -35,22 +35,64 @@ function trip_change() {
 
 
 function asd() {
+    var csvline = [];
+    var csvArray= [];
+
+    var csvlineAttributes = [];
+    var csvArrayAttributes= [];
+    var region_ids = [];
+
+    for ( var image_id in _via_img_metadata ) { 
+        var r = _via_img_metadata[image_id].regions;
+        if ( r.length !==0 ) {
+          for ( var i = 0; i < r.length; ++i ) {
+            // Shape attributes are HERE.
+            var sattr = map_to_json( r[i].shape_attributes );
+            csvline.push(sattr);
+
+            // Region Attributes
+            var rattr = map_to_json( r[i].region_attributes );
+            rattr = '"' +  escape_for_csv( rattr ) + '"';
+            csvlineAttributes.push(r[i].region_attributes);
+            region_ids.push(r[i].region_id);
+          }
+        }
+      }
+      if(csvlineAttributes.length != 0){
+          csvArrayAttributes = csvlineAttributes;
+            csvlineAttributes = JSON.stringify(csvlineAttributes);
+      }
+      else{
+          csvlineAttributes = "";
+      }
+
+      if(csvline.length != 0){
+        csvArray = csvline;
+        csvline = JSON.stringify(csvline);
+    }
+    else{
+        csvline = "";
+    }
     var image = document.getElementById("current_image").innerHTML;
+    
     image = image.replace($("#delete_photo").attr("media-url"),"");
+    
     // Removes whitespace
     image = image.trim();
-
+    console.log(image)
     $.ajax({
         type: "POST",
         url: "/via/alt",
         data: {
             image_file: image,
             alt_img: $("#alt-view").val(),
+            krill_attributes: JSON.stringify(csvArray),
+            region: JSON.stringify(region_ids),
             'csrfmiddlewaretoken': document.getElementById('trip_list').getAttribute("data-token")
         },
         success: function (result) {
-                console.log("WOOORKS!")
-
+            console.log(JSON.stringify(csvArray))
+            console.log(region_ids)
         }
     })
 }
@@ -68,23 +110,23 @@ function user_click_image(path){
         document.getElementById("netbox").value = result.event
         document.getElementById("alt-view").value = result.altr_view
         let xyz = result.position;
+        console.log(xyz)
+        console.log(result.altr_view)
         if (xyz == "Lateral"){
-            console.log("CUUUNT")
             let a = "Dorsal"
             document.getElementById("pbox").value = result.position
             $("#picname").text(a + " view:");
         }
-        else{
-            console.log("LOOOL")
+        else if (xyz == "Dorsal"){
             let a = "Lateral"
             document.getElementById("pbox").value = result.position
             $("#picname").text(a + " view:");
         }
-        console.log(result.board);
-        console.log(result.net);
-        console.log(result.event);
-        console.log(result.position);
-        console.log(result.position + " view:");
+        else{
+            document.getElementById("pbox").value = ""
+            $("#picname").text("Alternative view:");
+        }
+
     }})
     var img_index = _via_image_id_list.indexOf(img_id);
     _via_show_img(img_index);

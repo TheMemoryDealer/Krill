@@ -181,11 +181,46 @@ class AltViewAPIView(APIView):
 
     def post(self, request):
         # Saves the annotations to the image table too
-        file_name = request.data['image_file'].split('/')[-1]
+        file_name = request.data['image_file']
         print(file_name)
         print(request.data['alt_img'])
-        Image.objects.filter(file_name=file_name).update(altr_view=request.data['alt_img'])
-        Image.objects.filter(file_name=str(request.data['alt_img']).split("/")[-1]).update(altr_view=file_name)
+        print(request.data['alt_img'].split('/')[-1])
+        image = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+        print(image)
+        krill_attributes = request.data['krill_attributes']
+        bounding_boxes = []
+        region_id = request.data['region']
+        for x in list(Krill.objects.all()):
+            if (x.image_file_id==request.data['alt_img'].split('/')[-1]):
+                bounding_boxes.append({
+                    "width": x.width,
+                    "height": x.height,
+                    "x": x.x,
+                    "y": x.y
+                })
+        #print(bounding_boxes)
+        krill_attributes = ast.literal_eval(krill_attributes)
+        region_id = ast.literal_eval(region_id)
+        Image.objects.filter(image=file_name).update(altr_view=request.data['alt_img'])
+        Image.objects.filter(image=str(request.data['alt_img'])).update(altr_view=file_name)
+        print("This image: " + file_name)
+        print("______________")
+        print("Alt image: " + request.data['alt_img'])
+        # Update alternative parameters for Krill
+        for i in range(len(bounding_boxes)):
+            #print(type(bounding_boxes[i]))
+            #print(bounding_boxes[i])
+            box_info = bounding_boxes[i]
+            #print("___")
+            print(box_info['width'])
+            print(request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]))
+            Krill.objects.filter(unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i])).update(
+                altr_width=box_info['width'],
+                altr_height=box_info['height'],
+                altr_x=box_info['x'],
+                altr_y=box_info['y']
+            )
+        #print(len(bounding_boxes))
         return Response("Done")
 
 
@@ -194,8 +229,8 @@ class ImageAnnotationsAPIView(APIView):
 
     def post(self, request):
         # Saves the annotations to the image table too
-        file_name = request.data['image_file'].split('/')[-1]
-        print(file_name)
+        file_name = request.data['image_file'].split('/')[-1]        
+        #print(file_name)
         Image.objects.filter(file_name=file_name).update(image_annotations=request.data['image_annotations'])
         image = Image.objects.get(file_name=file_name)
         bounding_boxes = request.data['image_annotations']
@@ -217,14 +252,18 @@ class ImageAnnotationsAPIView(APIView):
         for i in range(len(krill_attributes)):
             unique_id = str(image.file_name) + "-" + str(region_id[i])
             box_info = ast.literal_eval(bounding_boxes[i].replace("\\", ""))
+            print(type(ast.literal_eval(bounding_boxes[i].replace("\\", ""))))
+            print("------")
             obj, created = Krill.objects.update_or_create(
                 unique_krill_id=unique_id,
                 defaults={'x': box_info['x'],
                           'y': box_info['y'], 'width': box_info['width'], 'height': box_info['height'],
                           'bounding_box_num': str(region_id[i]), 'unique_krill_id': unique_id, 'image_file': image,
                           'image_annotation': bounding_boxes[i], 'length': krill_attributes[i]['Length'],
-                          'maturity': krill_attributes[i]['Maturity']}
+                          'maturity': krill_attributes[i]['Maturity'], 'position': request.data["position"], 'event': request.data["event"],
+                          'net': request.data["net"], 'board': request.data["board"], 'altr_view': image.altr_view}
             )
+        print(len(krill_attributes))
         return Response("Done")
 
 
@@ -315,15 +354,21 @@ def Extract_Images(request):
             cv2.imwrite(pathName, image)
             i = i + 1
             print(str(i) + '/' + str(len(krill)))
+            # add bouding box to csv a welll for LAt and DORs
+            # add id 
+            # doo all manual labor till end of week
+            # use small arch like alexnet, vgg ,aybe bigger like reznet
+            
     return HttpResponseRedirect('/view_trips')
 
 
 def Extract_And_Send_CSV(trip):
+    print(trip)
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)
-    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal'])
+    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal', 'ID', 'image_annotation'])
     krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
-                                                                        'height', 'image_file_id', 'lateral', 'dorsal')
+                                                                        'height', 'image_file_id', 'lateral', 'dorsal', 'unique_krill_id', 'image_annotation', )
     krill = list(krill)
     for row in krill:
         if (row['maturity'] != "Unclassified"):
@@ -336,7 +381,7 @@ def Extract_And_Send_CSV(trip):
             # image = image[y:y+h,x:x+w]
             writer.writerow(
                 [row['length'], row['maturity'], row['x'], row['y'], row['width'], row['height'], row['image_file_id'],
-                 row['lateral'], row['dorsal']])
+                 row['lateral'], row['dorsal'], row['unique_krill_id'], row['image_annotation']])
 
     SUBJECT = 'Subject string'
     FILENAME = str(trip) + '.csv'
