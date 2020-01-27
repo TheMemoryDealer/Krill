@@ -182,7 +182,12 @@ function save_annotations_to_DB(){
 
     var url = $("#save_annotations").attr("ajax-url"); // gets text contents of clicked li
 
-
+        if ($("#alt-view").val() == ''){
+            $.alert({
+                title: 'Please connect alternate image first',        
+                content: ''
+            });
+        }
         $.ajax({
             type: "POST",
             url: url,
@@ -192,6 +197,7 @@ function save_annotations_to_DB(){
                 krill_attributes: csvlineAttributes,
                 board: $("#board").val(),
                 event: $("#event").val(),
+                alt_img: $("#alt-view").val(),
                 net: $("#netbox").val(),
                 position: $("#pbox").val(),
                 region: JSON.stringify(region_ids),

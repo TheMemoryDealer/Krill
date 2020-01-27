@@ -178,59 +178,40 @@ def Load_VIA(request):
 
 class AltViewAPIView(APIView):
     permission_classes = (AllowAny,)
-
     def post(self, request):
         # Saves the annotations to the image table too
         file_name = request.data['image_file']
-        print(file_name)
-        print(request.data['alt_img'])
-        print(request.data['alt_img'].split('/')[-1])
         image = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
-        print(image)
         krill_attributes = request.data['krill_attributes']
         bounding_boxes = []
         region_id = request.data['region']
         for x in list(Krill.objects.all()):
-            if (x.image_file_id==request.data['alt_img'].split('/')[-1]):
+            if (x.image_file_id==request.data['image_file'].split('/')[-1]):
                 bounding_boxes.append({
-                    "width": x.width,
-                    "height": x.height,
-                    "x": x.x,
-                    "y": x.y
+                    "width": x.width,"height": x.height,"x": x.x,"y": x.y
                 })
-        #print(bounding_boxes)
         krill_attributes = ast.literal_eval(krill_attributes)
         region_id = ast.literal_eval(region_id)
         Image.objects.filter(image=file_name).update(altr_view=request.data['alt_img'])
         Image.objects.filter(image=str(request.data['alt_img'])).update(altr_view=file_name)
-        print("This image: " + file_name)
-        print("______________")
-        print("Alt image: " + request.data['alt_img'])
-        # Update alternative parameters for Krill
-        for i in range(len(bounding_boxes)):
-            #print(type(bounding_boxes[i]))
-            #print(bounding_boxes[i])
-            box_info = bounding_boxes[i]
-            #print("___")
-            print(box_info['width'])
-            print(request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]))
-            Krill.objects.filter(unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i])).update(
-                altr_width=box_info['width'],
-                altr_height=box_info['height'],
-                altr_x=box_info['x'],
-                altr_y=box_info['y']
-            )
-        #print(len(bounding_boxes))
+        # for i in range(len(bounding_boxes)):
+        #     box_info = bounding_boxes[i]
+        #     Krill.objects.update_or_create(
+        #         unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]),
+        #         defaults={
+        #             'altr_width': box_info['width'],
+        #             'altr_height': box_info['height'],
+        #             'altr_x': box_info['x'],
+        #             'altr_y': box_info['y'],
+        #             'image_file': image,
+        #             'altr_view': file_name.split('/')[-1]
+        #         }
+        #     )
         return Response("Done")
-
-
 class ImageAnnotationsAPIView(APIView):
     permission_classes = (AllowAny,)
-
     def post(self, request):
-        # Saves the annotations to the image table too
         file_name = request.data['image_file'].split('/')[-1]        
-        #print(file_name)
         Image.objects.filter(file_name=file_name).update(image_annotations=request.data['image_annotations'])
         image = Image.objects.get(file_name=file_name)
         bounding_boxes = request.data['image_annotations']
@@ -252,8 +233,6 @@ class ImageAnnotationsAPIView(APIView):
         for i in range(len(krill_attributes)):
             unique_id = str(image.file_name) + "-" + str(region_id[i])
             box_info = ast.literal_eval(bounding_boxes[i].replace("\\", ""))
-            print(type(ast.literal_eval(bounding_boxes[i].replace("\\", ""))))
-            print("------")
             obj, created = Krill.objects.update_or_create(
                 unique_krill_id=unique_id,
                 defaults={'x': box_info['x'],
@@ -263,7 +242,34 @@ class ImageAnnotationsAPIView(APIView):
                           'maturity': krill_attributes[i]['Maturity'], 'position': request.data["position"], 'event': request.data["event"],
                           'net': request.data["net"], 'board': request.data["board"], 'altr_view': image.altr_view}
             )
-        print(len(krill_attributes))
+        bb = []
+        ri = request.data['region']
+        ka = request.data['krill_attributes']
+        img = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+        altri = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+        print("_______________")
+        print(altri)
+        print("_______________")
+        for x in list(Krill.objects.all()):
+            if (x.image_file_id==request.data['image_file'].split('/')[-1]):
+                bb.append({
+                    "width": x.width,"height": x.height,"x": x.x,"y": x.y
+                })
+        ka = ast.literal_eval(ka)
+        ri = ast.literal_eval(ri)
+        for i in range(len(bb)):
+            box_info = bb[i]
+            Krill.objects.update_or_create(
+                unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]),
+                defaults={
+                    'altr_width': box_info['width'],
+                    'altr_height': box_info['height'],
+                    'altr_x': box_info['x'],
+                    'altr_y': box_info['y'],
+                    'image_file': img,
+                    'altr_view': img.altr_view
+                }
+            )
         return Response("Done")
 
 
