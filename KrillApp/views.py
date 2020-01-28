@@ -17,7 +17,7 @@ import numpy as np
 import scipy.io
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views import View
@@ -181,7 +181,7 @@ class AltViewAPIView(APIView):
     def post(self, request):
         # Saves the annotations to the image table too
         file_name = request.data['image_file']
-        image = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+        # image = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
         krill_attributes = request.data['krill_attributes']
         bounding_boxes = []
         region_id = request.data['region']
@@ -211,10 +211,13 @@ class AltViewAPIView(APIView):
 class ImageAnnotationsAPIView(APIView):
     permission_classes = (AllowAny,)
     def post(self, request):
-        file_name = request.data['image_file'].split('/')[-1]        
+        file_name = request.data['image_file'].split('/')[-1]     
+        if (len(request.data['image_annotations']) < 5):
+            return HttpResponseBadRequest("Here's the text of the Web page.")
         Image.objects.filter(file_name=file_name).update(image_annotations=request.data['image_annotations'])
         image = Image.objects.get(file_name=file_name)
         bounding_boxes = request.data['image_annotations']
+        bounding_boxes_for_later_use = bounding_boxes
         krill_attributes = request.data['krill_attributes']
         region_id = request.data['region']
         # Removing the square brackets and quotations from the string
@@ -225,31 +228,38 @@ class ImageAnnotationsAPIView(APIView):
         krill_attributes = ast.literal_eval(krill_attributes)
         region_id = ast.literal_eval(region_id)
         Image.objects.filter(file_name=file_name).update(
-            event=request.data['event'],
-            net=request.data["net"],
+            net=request.data['event'],
+            event=request.data["net"],
             board=request.data["board"],
             position=request.data["position"]
         )
         for i in range(len(krill_attributes)):
             unique_id = str(image.file_name) + "-" + str(region_id[i])
             box_info = ast.literal_eval(bounding_boxes[i].replace("\\", ""))
+            # print("_______________")
+            # print(box_info['height'])
+            # box_info['height'] += 500
+            # box_info['width'] += 900
+            # print(box_info['height'])
+            # print(bounding_boxes[i])
+            # print("_______________")
             obj, created = Krill.objects.update_or_create(
                 unique_krill_id=unique_id,
                 defaults={'x': box_info['x'],
                           'y': box_info['y'], 'width': box_info['width'], 'height': box_info['height'],
                           'bounding_box_num': str(region_id[i]), 'unique_krill_id': unique_id, 'image_file': image,
                           'image_annotation': bounding_boxes[i], 'length': krill_attributes[i]['Length'],
-                          'maturity': krill_attributes[i]['Maturity'], 'position': request.data["position"], 'event': request.data["event"],
-                          'net': request.data["net"], 'board': request.data["board"], 'altr_view': image.altr_view}
+                          'maturity': krill_attributes[i]['Maturity'], 'position': request.data["position"], 'event': request.data["net"],
+                          'net': request.data["event"], 'board': request.data["board"], 'altr_view': image.altr_view}
             )
         bb = []
         ri = request.data['region']
         ka = request.data['krill_attributes']
-        img = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
-        altri = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
-        print("_______________")
-        print(altri)
-        print("_______________")
+        # print(len(request.data['alt_img']))
+        # altri = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+        # print("_______________")
+        # print(altri)
+        # print("_______________")
         for x in list(Krill.objects.all()):
             if (x.image_file_id==request.data['image_file'].split('/')[-1]):
                 bb.append({
@@ -257,19 +267,24 @@ class ImageAnnotationsAPIView(APIView):
                 })
         ka = ast.literal_eval(ka)
         ri = ast.literal_eval(ri)
-        for i in range(len(bb)):
-            box_info = bb[i]
-            Krill.objects.update_or_create(
-                unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]),
-                defaults={
-                    'altr_width': box_info['width'],
-                    'altr_height': box_info['height'],
-                    'altr_x': box_info['x'],
-                    'altr_y': box_info['y'],
-                    'image_file': img,
-                    'altr_view': img.altr_view
-                }
-            )
+        if (len(request.data['alt_img']) > 5):
+            img = Image.objects.get(file_name=request.data['alt_img'].split('/')[-1])
+            for i in range(len(bb)):
+                box_info = bb[i]
+                Krill.objects.update_or_create(
+                    unique_krill_id=request.data['alt_img'].split('/')[-1] + "-" + str(region_id[i]),
+                    defaults={
+                        'altr_width': box_info['width'],
+                        'altr_height': box_info['height'],
+                        'altr_x': box_info['x'],
+                        'altr_y': box_info['y'],
+                        'image_file': img,
+                        'altr_view': img.altr_view,
+                        'position': img.position
+                    }
+                )
+
+        # Image.objects.filter(file_name=request.data['alt_img'].split('/')[-1]).update(image_annotations=bounding_boxes_for_later_use)
         return Response("Done")
 
 
@@ -278,6 +293,7 @@ def Load_Image_Annotations(request):
     firstImage = Images.first()
     krill = Krill.objects.filter(unique_krill_id__contains=str(firstImage.file_name))
     data = json.dumps(list(krill.values()), cls=DjangoJSONEncoder, ensure_ascii=False)
+    # print(data)
     return JsonResponse({
         'annotations': firstImage.image_annotations,
         'region_attributes': data,
@@ -288,29 +304,49 @@ def Load_Image_Annotations(request):
 def Pull_From_CSV(request):
     #Get_Image_Cruise_Details(request)
     image = Image.objects.get(image=str(request.POST['image']))
-    print(image)
+    # print(image)
     conn = csvsqlite3.connect('JR255A.csv')
     cur = conn.cursor()
     # print(cur.execute("select * from csv WHERE Lateral OR Dorsal='"+ str(image.file_name) +"'"))
     # Do it like this, trust me
     xyz = "'" + str(image.file_name) + "'"
     abc = "select * from csv WHERE Lateral = " + xyz + " or Dorsal = " + xyz
-    print(abc)
+    # print(abc)
     cur.execute(abc)
-    print(str(image.file_name))
+    # print(str(image.file_name))
     excel_data = cur.fetchall()
-    for a in excel_data:
-        print(a)
+    # for a in excel_data:
+    #     print(a)
 
     krill_to_update = Krill.objects.filter(unique_krill_id__contains=str(image.file_name))
-    print(len(excel_data))
+    img_to_update = Image.objects.filter(file_name=str(image.file_name))
+    # print(krill_to_update)
+    # print("IMG TO UPDATE:")
+    # print(img_to_update)
+    # print(len(excel_data))
+    a = Image.objects.filter(file_name=str(image.file_name)).get()
+    img_list = [a] * len(excel_data)
+    print(img_list)
     for i in range(len(excel_data)):
         if i < len(excel_data):
             print(excel_data[i])
             test = krill_to_update[i]
+            img = img_list[i]
+            img.board = excel_data[i][5]
+            img.event = excel_data[i][0]
+            img.net = excel_data[i][2]
+            if (image.file_name == excel_data[i][6]):
+                img.position = 'Dorsal'
+                test.position = 'Dorsal'
+            elif (image.file_name == excel_data[i][7]):
+                img.position = "Lateral"
+                test.position = 'Lateral'
+            else:
+                pass
             print('______________________')
             print(krill_to_update[i])
             print('______________________')
+            print(img_list[i])
             test.length = excel_data[i][3]
             print('______________________')
             print(excel_data[i][3])
@@ -324,6 +360,7 @@ def Pull_From_CSV(request):
             test.net = excel_data[i][2]
             test.board = excel_data[i][5]
             test.save()
+            img.save()
     conn.close()
     return JsonResponse({
         'num_pulled': len(excel_data),

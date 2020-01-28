@@ -26,6 +26,9 @@ function trip_change() {
             $("#alt-view").append(
                 "<option value=></option>"
               )
+              $("#alt-view").append(
+                "<option value=NONE>NONE</option>"
+              )
            
         }
     })
@@ -92,7 +95,7 @@ function asd() {
         },
         success: function (result) {
             console.log(JSON.stringify(csvArray))
-            console.log(region_ids)
+            console.log($("#alt-view").val())
         }
     })
 }
@@ -181,7 +184,7 @@ function save_annotations_to_DB(){
       image = image.trim();
 
     var url = $("#save_annotations").attr("ajax-url"); // gets text contents of clicked li
-
+        console.log($("#alt-view").val())
         if ($("#alt-view").val() == ''){
             $.alert({
                 title: 'Please connect alternate image first',        
@@ -211,7 +214,18 @@ function save_annotations_to_DB(){
                     });
 
                
-            }
+            },
+            error: function (result) {
+                $.alert({
+                    title: 'Something went wrong',
+                    content: "Have you turned Toggle Annotations on ?",
+            
+                });
+
+           
+        },
+            
+
         })
 
     
@@ -281,7 +295,8 @@ function toggleClicked(){
     image = image.replace($("#delete_photo").attr("media-url"),"");
     // Removes whitespace
     image = image.trim();
-
+    // console.log(url)
+    // console.log("u aint shit")
     $.ajax({type: "POST",
     url: url,
     data: {image_file: image_file,
@@ -291,7 +306,9 @@ function toggleClicked(){
    
 
         var annotations = result['annotations'];
+        // console.log(annotations)
         var region_attributes = result['region_attributes'];
+        //console.log(region_attributes)
         if(annotations!=""){
         var m = json_str_to_map( annotations );
         var r = json_str_to_map(region_attributes);
@@ -304,7 +321,7 @@ function toggleClicked(){
             var maturity=r[i]['maturity'];
             
             bounding_box=bounding_box.replace(/\\/g, '');
-            
+            // console.log(bounding_box)
             region_i.shape_attributes = JSON.parse(bounding_box);
             region_i.region_attributes['Length']=length;
             region_i.region_attributes['Maturity']=maturity;
