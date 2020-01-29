@@ -304,8 +304,12 @@ def Load_Image_Annotations(request):
 def Pull_From_CSV(request):
     #Get_Image_Cruise_Details(request)
     image = Image.objects.get(image=str(request.POST['image']))
+    print(str(request.POST['image']))
+    if ('JR260B' in str(request.POST['image'])):
+        conn = csvsqlite3.connect('JR260B.csv')
+    elif ('JR255A' in str(request.POST['image'])):
+        conn = csvsqlite3.connect('JR255A.csv')
     # print(image)
-    conn = csvsqlite3.connect('JR255A.csv')
     cur = conn.cursor()
     # print(cur.execute("select * from csv WHERE Lateral OR Dorsal='"+ str(image.file_name) +"'"))
     # Do it like this, trust me
@@ -401,6 +405,8 @@ def Extract_Images(request):
             # add id 
             # doo all manual labor till end of week
             # use small arch like alexnet, vgg ,aybe bigger like reznet
+            # add readme txt to csv file that says what incermented
+
             
     return HttpResponseRedirect('/view_trips')
 
