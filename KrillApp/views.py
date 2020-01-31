@@ -309,7 +309,18 @@ def Pull_From_CSV(request):
         conn = csvsqlite3.connect('JR260B.csv')
     elif ('JR255A' in str(request.POST['image'])):
         conn = csvsqlite3.connect('JR255A.csv')
-    # print(image)
+    elif ('JR291_Event' in str(request.POST['image'])):
+        print("LOOOOOOLZ")
+        conn = csvsqlite3.connect('JR291.csv')
+    elif ('Event' in str(request.POST['image'])):
+        conn = csvsqlite3.connect('JR280.csv')
+    elif ('DSC' in str(request.POST['image'])):
+        conn = csvsqlite3.connect('JR15002.csv')
+    else:
+        pass
+    
+        
+    print(image)
     cur = conn.cursor()
     # print(cur.execute("select * from csv WHERE Lateral OR Dorsal='"+ str(image.file_name) +"'"))
     # Do it like this, trust me
