@@ -315,6 +315,7 @@ def Pull_From_CSV(request):
     elif ('Event' in str(request.POST['image'])):
         conn = csvsqlite3.connect('JR280.csv')
     elif ('DSC' in str(request.POST['image'])):
+        print("LOOOOL")
         conn = csvsqlite3.connect('JR15002.csv')
     else:
         pass
@@ -326,6 +327,7 @@ def Pull_From_CSV(request):
     # Do it like this, trust me
     xyz = "'" + str(image.file_name) + "'"
     abc = "select * from csv WHERE Lateral = " + xyz + " or Dorsal = " + xyz
+    print(abc)
     # print(abc)
     cur.execute(abc)
     # print(str(image.file_name))
@@ -392,13 +394,14 @@ def Export_To_CSV(request):
 
 def Extract_Images(request):
     trip = str(request.POST['trip'])
-    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
+    krill = Krill.objects.all().values('length', 'maturity', 'x', 'y', 'width',
                                                                         'height', 'image_file_id', 'lateral', 'dorsal',
                                                                         'unique_krill_id')
     krill = list(krill)
     i = 0
     for row in krill:
         if (row['maturity'] != "Unclassified"):
+            print(row)
             print("Start")
             x = int(row['x'])
             y = int(row['y'])
@@ -426,10 +429,13 @@ def Extract_And_Send_CSV(trip):
     print(trip)
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)
-    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal', 'ID', 'image_annotation'])
-    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
-                                                                        'height', 'image_file_id', 'lateral', 'dorsal', 'unique_krill_id', 'image_annotation', )
+    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal', 'ID', 'altr_view', 'position', 'altr_height', 'altr_width',
+    'altr_x', 'altr_y', 'event', 'net', 'board'])
+    krill = Krill.objects.all().values('length', 'maturity', 'x', 'y', 'width',
+                                                                        'height', 'image_file_id', 'lateral', 'dorsal', 'unique_krill_id', 'altr_view', 'position', 'altr_height', 'altr_width',
+    'altr_x', 'altr_y', 'event', 'net', 'board')
     krill = list(krill)
+    print(krill)
     for row in krill:
         if (row['maturity'] != "Unclassified"):
             # x=int(row['x'])
@@ -441,7 +447,8 @@ def Extract_And_Send_CSV(trip):
             # image = image[y:y+h,x:x+w]
             writer.writerow(
                 [row['length'], row['maturity'], row['x'], row['y'], row['width'], row['height'], row['image_file_id'],
-                 row['lateral'], row['dorsal'], row['unique_krill_id'], row['image_annotation']])
+                 row['lateral'], row['dorsal'], row['unique_krill_id'], row['altr_view'], row['position'], row['altr_height'], 
+                 row['altr_width'], row['altr_x'], row['altr_y'], row['event'], row['net'], row['board']])
 
     SUBJECT = 'Subject string'
     FILENAME = str(trip) + '.csv'
