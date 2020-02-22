@@ -159,16 +159,16 @@
     <!-- menu bar -->
     <div class="menubar">
       <ul>
-        <li>Project
+        <!-- <li>Project
           <ul>
             <li onclick="settings_panel_toggle()" title="Show/edit project settings">Settings</li>
             <li class="submenu_divider"></li>
           </ul>
-        </li>
+        </li> -->
 
         <li>Annotation
           <ul>
-            <li onclick="download_all_region_data('csv')" title="Export annotations to a CSV file">Export Annotations
+            <!-- <li onclick="download_all_region_data('csv')" title="Export annotations to a CSV file">Export Annotations
               (as csv)</li>
             <li onclick="download_all_region_data('json')" title="Export annotaitons to a JSON file">Export Annotations
               (as json)</li>
@@ -179,7 +179,7 @@
               Annotations (from json)</li>
             <li class="submenu_divider"></li>
             <li onclick="show_annotation_data()" title="Show a preview of annotations (opens in a new browser windows)">
-              Preview Annotations</li>
+              Preview Annotations</li> -->
             <li onclick="download_as_image()" title="Download an image containing the annotations">Download as Image
             </li>
           </ul>
@@ -190,10 +190,10 @@
         <li>Help
           <ul>
             <li class="submenu_divider"></li>
-            <li><a target="_blank" href="https://gitlab.com/vgg/via/blob/master/Contributors.md"
-                title="List of people who have contributed towards the development of VIA">Contributors</a></li>
-            <li onclick="set_display_area_content(VIA_DISPLAY_AREA_CONTENT_NAME.PAGE_LICENSE)"
-              title="View license of this application">License</li>
+            <!-- <li><a target="_blank" href="https://gitlab.com/vgg/via/blob/master/Contributors.md"
+                title="List of people who have contributed towards the development of VIA">Contributors</a></li> -->
+            <li><a target="_blank" href="https://gitlab.com/vgg/via/-/blob/master/LICENSE"
+                title="View license of this application">License</a></li>
             <li onclick="set_display_area_content(VIA_DISPLAY_AREA_CONTENT_NAME.PAGE_ABOUT)"
               title="Show more details about this application">About VIA</li>
           </ul>
@@ -217,7 +217,7 @@
 
     </div>
     <!-- end of shortcut toolbar -->
-    <input type="file" id="invisible_file_input" name="files[]" style="display:none">
+    <!-- <input type="file" id="invisible_file_input" name="files[]" style="display:none"> -->
   </div> <!-- endof #top_panel -->
 
   <!-- Middle Panel contains a left-sidebar and image display areas -->
@@ -236,7 +236,7 @@
         <span class="text_button" onclick="leftsidebar_toggle()" title="Show/hide this toolbar panel">&ltrif;</span>
       </div>
 
-      <button class="leftsidebar_accordion active">Region Shape</button>
+      <!-- <button class="leftsidebar_accordion active">Region Shape</button>
       <div class="leftsidebar_accordion_panel show">
         <ul class="region_shape">
           <li id="region_shape_rect" class="selected" onclick="select_region_shape('rect')"
@@ -244,7 +244,7 @@
               <use xlink:href="#shape_rectangle"></use>
             </svg></li>
         </ul>
-      </div>
+      </div> -->
 
       <div id="rightsidebar">
         <button class="leftsidebar_accordion active">Cruise details</button>
@@ -311,9 +311,9 @@
               Selected Photo</span>
             <span style="display:block;text-align: center" id="save_annotations" ajax-url= "{% url 'save_image_annotations' %}" media-url="{{ MEDIA_URL}}"
               class="btn btn-primary" onclick="save_annotations_to_DB()" title="">Save Data</span>
-              <span style="display:block;text-align: center" id="detect_krill" ajax-url-2= "{% url 'detect_krill' %}" media-url="{{ MEDIA_URL}}" ajax-url="{% url 'detect_krill' %}"
-              class="btn btn-primary" onclick="detect_krill()" title="">Detect Krill</span>
-              <span style="display:block;text-align: center" id="pull_csv_data" class="btn btn-primary" onclick="pull_from_csv()" title="">Pull Photo CSV Data</span>
+              <!-- <span style="display:block;text-align: center" id="detect_krill" ajax-url-2= "{% url 'detect_krill' %}" media-url="{{ MEDIA_URL}}" ajax-url="{% url 'detect_krill' %}"
+              class="btn btn-primary" onclick="detect_krill()" title="">Detect Krill</span> -->
+              <!-- <span style="display:block;text-align: center" id="pull_csv_data" class="btn btn-primary" onclick="pull_from_csv()" title="">Pull Photo CSV Data</span> -->
             <span style="display:block;text-align: center" id="sort_boxes" class="btn btn-primary" onclick="sort_boxes()" title="">Sort Boxes</span>
           </div>
           </div>

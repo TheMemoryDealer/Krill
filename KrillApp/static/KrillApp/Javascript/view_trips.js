@@ -198,6 +198,7 @@ function export_trip_to_csv() {
                             url: "/export_to_csv/",
                             data: {
                                 trip: trip_to_export,
+                                eml: email,
                                 'csrfmiddlewaretoken': csrftoken
                             },
                             success: function (result) {

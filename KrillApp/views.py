@@ -310,12 +310,10 @@ def Pull_From_CSV(request):
     elif ('JR255A' in str(request.POST['image'])):
         conn = csvsqlite3.connect('JR255A.csv')
     elif ('JR291_Event' in str(request.POST['image'])):
-        print("LOOOOOOLZ")
         conn = csvsqlite3.connect('JR291.csv')
     elif ('Event' in str(request.POST['image'])):
         conn = csvsqlite3.connect('JR280.csv')
     elif ('DSC' in str(request.POST['image'])):
-        print("LOOOOL")
         conn = csvsqlite3.connect('JR15002.csv')
     else:
         pass
@@ -386,7 +384,8 @@ def Pull_From_CSV(request):
 
 def Export_To_CSV(request):
     trip = str(request.POST['trip'])
-    thread = threading.Thread(target=Extract_And_Send_CSV, args=(trip,))
+    email = str(request.POST['eml'])
+    thread = threading.Thread(target=Extract_And_Send_CSV, args=(trip,email))
     thread.daemon = True
     thread.start()
     return HttpResponseRedirect('/view_trips')
@@ -425,17 +424,17 @@ def Extract_Images(request):
     return HttpResponseRedirect('/view_trips')
 
 
-def Extract_And_Send_CSV(trip):
-    print(trip)
+def Extract_And_Send_CSV(trip, eml):
+    # print(trip)
+    # print(eml)
     csvfile = io.StringIO()
     writer = csv.writer(csvfile)
-    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'lateral', 'dorsal', 'ID', 'altr_view', 'position', 'altr_height', 'altr_width',
-    'altr_x', 'altr_y', 'event', 'net', 'board'])
-    krill = Krill.objects.all().values('length', 'maturity', 'x', 'y', 'width',
+    writer.writerow(['length', 'maturity', 'x', 'y', 'width', 'height', 'image_name', 'ID', 'Alternative view ID', 'position', 'event', 'net', 'board'])
+    krill = Krill.objects.filter(unique_krill_id__contains=trip).values('length', 'maturity', 'x', 'y', 'width',
                                                                         'height', 'image_file_id', 'lateral', 'dorsal', 'unique_krill_id', 'altr_view', 'position', 'altr_height', 'altr_width',
-    'altr_x', 'altr_y', 'event', 'net', 'board')
+                                                                        'altr_x', 'altr_y', 'event', 'net', 'board')
     krill = list(krill)
-    print(krill)
+    # print(krill)
     for row in krill:
         if (row['maturity'] != "Unclassified"):
             # x=int(row['x'])
@@ -445,16 +444,17 @@ def Extract_And_Send_CSV(trip):
             # image = Image.objects.get(file_name=row['image_file_id'])
             # image = cv2.imread("media/"+str(image.image))
             # image = image[y:y+h,x:x+w]
+            altID = row['unique_krill_id'].split('-')[-1]
+            altID = row['altr_view'].split('/')[-1] + '-' + altID
             writer.writerow(
-                [row['length'], row['maturity'], row['x'], row['y'], row['width'], row['height'], row['image_file_id'],
-                 row['lateral'], row['dorsal'], row['unique_krill_id'], row['altr_view'], row['position'], row['altr_height'], 
-                 row['altr_width'], row['altr_x'], row['altr_y'], row['event'], row['net'], row['board']])
+                [row['length'], row['maturity'], row['x'], row['y'], row['width'], row['height'],
+                 row['image_file_id'], row['unique_krill_id'], altID, row['position'], row['event'], row['net'], row['board']])
 
     SUBJECT = 'Subject string'
     FILENAME = str(trip) + '.csv'
     MY_EMAIL = 'uea.krill.annotation@gmail.com'
     MY_PASSWORD = 'Krill123'
-    TO_EMAIL = 'mazvydas66@gmail.com'
+    TO_EMAIL = eml
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
 
