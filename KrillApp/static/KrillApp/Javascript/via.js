@@ -319,7 +319,6 @@ function file_metadata(filename, size) {
 function file_region() {
   this.shape_attributes  = {}; // region shape attributes
   this.region_attributes = {}; // region attributes
-  this.region_id=0;
 }
 
 //
@@ -430,7 +429,6 @@ function download_as_image() {
     a.href     = saved_img;
     a.target   = '_blank';
     a.download = _via_current_image_filename.slice(0,-1);
-    console.log("YEET");
 
     // simulate a mouse click event
     var event = new MouseEvent('click', {
@@ -442,6 +440,25 @@ function download_as_image() {
     a.dispatchEvent(event);
   }
 }
+
+function download_doc() {
+    // extract image data from canvas
+    var saved_img = '../readme.pdf'
+
+    // simulate user click to trigger download of image
+    var a      = document.createElement('a');
+    a.href     = saved_img;
+    a.target   = '_blank';
+
+    // simulate a mouse click event
+    var event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true
+    });
+
+    a.dispatchEvent(event);
+  }
 
 //
 // Display area content
@@ -1087,7 +1104,6 @@ function pack_via_metadata(return_type) {
           csvline.push(sattr);
           console.log(sattr);
 
-          // Regions attributs are HERE.
           var rattr = map_to_json( r[i].region_attributes );
           rattr = '"' +  escape_for_csv( rattr ) + '"';
           csvline.push(rattr);

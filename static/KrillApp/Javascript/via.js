@@ -430,6 +430,11 @@ function download_as_image() {
     a.target   = '_blank';
     a.download = _via_current_image_filename.slice(0,-1);
     console.log("YEET");
+    console.log("MOTHERFUCKER!!!!!")
+    var loc = window.location.pathname;
+    var dir = loc.substring(0, loc.lastIndexOf('/'));
+    console.log(loc);
+    console.log("MOTHERFUCKER!!!!!")
 
     // simulate a mouse click event
     var event = new MouseEvent('click', {
