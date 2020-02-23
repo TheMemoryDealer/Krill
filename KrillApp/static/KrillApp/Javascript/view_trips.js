@@ -78,6 +78,7 @@ $(function () {
 $(function () {
     $("#delete_trip").click(function () {
         if (document.getElementById("Trip_Name").innerHTML == ''){
+            console.log(document.getElementById("Trip_Name").innerHTML)
             $.alert('Select a trip to delete first');
             return
         }
