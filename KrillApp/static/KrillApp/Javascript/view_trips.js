@@ -77,12 +77,17 @@ $(function () {
 
 $(function () {
     $("#delete_trip").click(function () {
+        if (document.getElementById("Trip_Name").innerHTML == ''){
+            $.alert('Select a trip to delete first');
+            return
+        }
         $.confirm({
             title: 'Confirm Trip Deletion',
             content: 'Are you sure you want to delete the trip "' + $("#Trip_Name").text() + '" and it\'s images?',
             buttons: {
                 confirm: function () {
                     var trip_name = document.getElementById("Trip_Name").innerHTML;
+                    
                     var url = $("#delete_trip").attr("ajax-url");
                     $.ajax({
                         type: "POST",
@@ -166,7 +171,10 @@ $(function () {
 
 
 function export_trip_to_csv() {
-
+    if (document.getElementById("Trip_Name").innerHTML == ''){
+        $.alert('Select a trip to export first');
+        return
+    }
     $.confirm({
         title: 'Enter valid email address to receive processed CSV file.',
         content: '' +
