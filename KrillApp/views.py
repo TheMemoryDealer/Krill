@@ -385,9 +385,9 @@ def Pull_From_CSV(request):
 
 def pdf_download(request):
     try:
-        wrapper = FileWrapper(open('./readme.pdf', 'rb'))
+        wrapper = FileWrapper(open('./Krill/readme.pdf', 'rb'))
         response = HttpResponse(wrapper, content_type='application/force-download')
-        response['Content-Disposition'] = 'inline; filename=' + os.path.basename('./readme.pdf')
+        response['Content-Disposition'] = 'inline; filename=' + os.path.basename('./Krill/readme.pdf')
         return response
     except Exception as e:
         return None

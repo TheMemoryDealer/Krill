@@ -25,7 +25,7 @@ SECRET_KEY = 'z)bw6@ks!p^dhr(ijsvcfygtl0hsl^h)iyc$jst5fxz_k3t5l3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['krill.projects.cmp.uea.ac.uk']
 
 
 # Application definition
