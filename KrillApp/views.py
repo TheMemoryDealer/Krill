@@ -3,6 +3,8 @@ import csv
 import io
 import json
 import os
+import mimetypes
+from wsgiref.util import FileWrapper
 import cv2
 import pickle
 import smtplib
@@ -380,6 +382,17 @@ def Pull_From_CSV(request):
     return JsonResponse({
         'num_pulled': len(excel_data),
     })
+
+def pdf_download(request):
+    try:
+        wrapper = FileWrapper(open('./readme.pdf', 'rb'))
+        response = HttpResponse(wrapper, content_type='application/force-download')
+        response['Content-Disposition'] = 'inline; filename=' + os.path.basename('./readme.pdf')
+        return response
+    except Exception as e:
+        return None
+
+
 
 
 def Export_To_CSV(request):

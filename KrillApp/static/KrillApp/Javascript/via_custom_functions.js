@@ -100,6 +100,7 @@ function asd() {
     })
 }
 
+
 function user_click_image(path){
     _via_img_metadata={};
     var img_id    = project_file_add_url(path);

@@ -1545,6 +1545,7 @@ function draw_all_region_id() {
     // then, draw text over this background rectangle
     _via_reg_ctx.globalAlpha = 1.0;
     _via_reg_ctx.fillStyle = 'yellow';
+    _via_img_metadata[_via_image_id].regions[i].region_id=annotation_str;
     _via_reg_ctx.fillText(annotation_str,
                           Math.floor(x + 0.4*char_width),
                           Math.floor(y - 0.35*char_height));
@@ -3153,6 +3154,7 @@ function update_img_fn_list() {
       img_fn_list.innerHTML = _via_img_fn_list_html.join('');
       img_fn_list_scroll_to_current_file();
     } else {
+      console.log("HERE");
       // filter according to preset filters
       img_fn_list_onpresetfilter_select();
     }
@@ -3539,7 +3541,7 @@ function show_attribute_options() {
 
   var attr_id = attr_list.value;
   var attr_type = _via_attributes[_via_attribute_being_updated][attr_id].type;
-
+  console.log(_via_attributes);
   // populate additional options based on attribute type
   switch( attr_type ) {
   case VIA_ATTRIBUTE_TYPE.TEXT:
@@ -4366,7 +4368,7 @@ function hide_user_input_panel() {
 function annotation_editor_show() {
   // remove existing annotation editor (if any)
   annotation_editor_remove();
-
+  console.log("HEY");
   // create new container of annotation editor
   var ae = document.createElement('div');
   ae.setAttribute('id', 'annotation_editor');
@@ -4389,6 +4391,7 @@ function annotation_editor_show() {
         var html_position = annotation_editor_get_placement(_via_user_sel_region_id);
         ae.style.top = html_position.top;
         ae.style.left = html_position.left;
+        ae.style.width = '20%';
       }
       _via_display_area.appendChild(ae);
       annotation_editor_update_content();
@@ -5600,6 +5603,7 @@ function project_file_remove_confirmed(input) {
 
 
 function project_remove_file(img_index) {
+  console.log("DEKETE");
   if ( img_index < 0 || img_index >= _via_img_count ) {
     console.log('project_remove_file(): invalid img_index ' + img_index);
     return;

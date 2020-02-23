@@ -441,24 +441,24 @@ function download_as_image() {
   }
 }
 
-function download_doc() {
-    // extract image data from canvas
-    var saved_img = '../readme.pdf'
+// function download_doc() {
+//     // extract image data from canvas
+//     var saved_img = '../readme.pdf'
 
-    // simulate user click to trigger download of image
-    var a      = document.createElement('a');
-    a.href     = saved_img;
-    a.target   = '_blank';
+//     // simulate user click to trigger download of image
+//     var a      = document.createElement('a');
+//     a.href     = saved_img;
+//     a.target   = '_blank';
 
-    // simulate a mouse click event
-    var event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true
-    });
+//     // simulate a mouse click event
+//     var event = new MouseEvent('click', {
+//       view: window,
+//       bubbles: true,
+//       cancelable: true
+//     });
 
-    a.dispatchEvent(event);
-  }
+//     a.dispatchEvent(event);
+//   }
 
 //
 // Display area content

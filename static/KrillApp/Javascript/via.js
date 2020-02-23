@@ -429,12 +429,6 @@ function download_as_image() {
     a.href     = saved_img;
     a.target   = '_blank';
     a.download = _via_current_image_filename.slice(0,-1);
-    console.log("YEET");
-    console.log("MOTHERFUCKER!!!!!")
-    var loc = window.location.pathname;
-    var dir = loc.substring(0, loc.lastIndexOf('/'));
-    console.log(loc);
-    console.log("MOTHERFUCKER!!!!!")
 
     // simulate a mouse click event
     var event = new MouseEvent('click', {
@@ -446,6 +440,25 @@ function download_as_image() {
     a.dispatchEvent(event);
   }
 }
+
+function download_doc() {
+    // extract image data from canvas
+    var saved_img = '../readme.pdf'
+
+    // simulate user click to trigger download of image
+    var a      = document.createElement('a');
+    a.href     = saved_img;
+    a.target   = '_blank';
+
+    // simulate a mouse click event
+    var event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true
+    });
+
+    a.dispatchEvent(event);
+  }
 
 //
 // Display area content
