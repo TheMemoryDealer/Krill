@@ -468,8 +468,8 @@ def Extract_And_Send_CSV(trip, eml):
 
     SUBJECT = 'Subject string'
     FILENAME = str(trip) + '.csv'
-    MY_EMAIL = 'uea.krill.annotation@gmail.com'
-    MY_PASSWORD = 'Krill123'
+    MY_EMAIL = ''
+    MY_PASSWORD = ''
     TO_EMAIL = eml
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
