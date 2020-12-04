@@ -408,13 +408,15 @@ def Extract_Images(request):
     trip = str(request.POST['trip'])
     krill = Krill.objects.all().values('length', 'maturity', 'x', 'y', 'width',
                                                                         'height', 'image_file_id', 'lateral', 'dorsal',
-                                                                        'unique_krill_id')
+                                                                        'unique_krill_id', 'position')
     krill = list(krill)
     i = 0
+    print("Extracting")
     for row in krill:
-        if (row['maturity'] != "Unclassified"):
-            print(row)
-            print("Start")
+        # print(row['position'])
+        if (row['maturity'] != "Unclassified" '''and row['position'] == "Dorsal"'''):
+            # print(row)
+            # print("Start")
             x = int(row['x'])
             y = int(row['y'])
             w = int(row['width'])
@@ -426,7 +428,8 @@ def Extract_Images(request):
             pathName = '/Users/mazgudelis/Desktop/ComputerVision/Krill images/' + imgName
             cv2.imwrite(pathName, image)
             i = i + 1
-            print(str(i) + '/' + str(len(krill)))
+            if (i % 50 == 0):
+                print(str(i) + '/' + str(len(krill)))
             # add bouding box to csv a welll for LAt and DORs
             # add id 
             # doo all manual labor till end of week
